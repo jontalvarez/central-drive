@@ -12,10 +12,13 @@ import time
 from dkc_rehamovelib.DKC_rehamovelib import * # Import our library
 from datetime import datetime
 
-import busio
-import board
-import adafruit_ads1x15.ads1115 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
+ADC_ENABLED = False
+
+if ADC_ENABLED:
+	import busio
+	import board
+	import adafruit_ads1x15.ads1115 as ADS
+	from adafruit_ads1x15.analog_in import AnalogIn
 
 SAMPLES = 1000
 SAMPLES_ = 100
@@ -54,7 +57,7 @@ class Window1(QDialog):
 		myFES.port = "/dev/ttyUSB0"
 		myFES.connect()
 		myFES.initialize()
-		if myFES.is_connected():
+		if not myFES.is_connected():
 			# self.connect_lbl.setText('Successful')
 			# self.connect_lbl.setStyleSheet('color: Green')
 			# time.sleep(1)
@@ -161,14 +164,22 @@ class Window2(QtWidgets.QMainWindow):
 	def update_plot(self):
 		"""Update the plot with new data."""
 		self.x = self.add_data(self.x, time.time()-self.time_start)
-		self.y1 = self.add_data(self.y1, (myADC.voltage))
-		
 		self.x_storage.append(float(time.time()-self.time_start))
-		self.y1_storage.append(float(myADC.voltage))
+
+		if ADC_ENABLED:
+			self.y1 = self.add_data(self.y1, (myADC.voltage))
+			self.y1_storage.append(float(myADC.voltage))
+		else:
+			self.y1 = self.add_data(self.y1, np.random.randint(0, 10))
+			self.y1_storage.append(np.random.randint(0, 10))
+
 		self.data_line1.setData(self.x, self.y1)
-		if (float(myADC.voltage) > self.max_value_reached):
-			self.max_value_reached = (float(myADC.voltage))
-			self.committedNp_lbl.display(self.max_value_reached)
+
+		#Add max value reached to plot
+		# if ADC_ENABLED:
+		# 	if (float(myADC.voltage) > self.max_value_reached):
+		# 		self.max_value_reached = (float(myADC.voltage))
+		# 		self.committedNp_lbl.display(self.max_value_reached)
 
 	def add_data(self, data_buffer, new_data): 
 		"""Store new data in buffer."""
@@ -238,8 +249,6 @@ class Window2(QtWidgets.QMainWindow):
 			self.timer.stop()
 		else:
 			self.timer.start()
-
-
 
 
 ## CENTRAL DRIVE WINDOW:
@@ -331,41 +340,31 @@ class Window3(QtWidgets.QMainWindow):
 	def update_plot(self):
 		"""Update the plot with new data."""
 		self.x = self.add_data(self.x, time.time()-self.time_start)
-		self.y1 = self.add_data(self.y1, (myADC.voltage))
-		
 		self.x_storage.append(float(time.time()-self.time_start))
-		self.y1_storage.append(float(myADC.voltage))
-		self.data_line1.setData(self.x, self.y1)
-		i = 1
 
-		if not self.test_complete:
-			if (myADC.voltage) > 0:
-				if int(np.size(self.y1_storage)) > 51:
-					if not np.any(np.array(self.y1_storage[-50:]) < 0):
-						print('success')
-						self.test_complete = True
-		# print(self.y1)
-		# if self.y1[0] > 4000:
-		# 	self.sendPulseFES()
+		if ADC_ENABLED:	
+			self.y1 = self.add_data(self.y1, (myADC.voltage))
+			self.y1_storage.append(float(myADC.voltage))
+		else:
+			self.y1 = self.add_data(self.y1, np.random.randint(0,10))
+			self.y1_storage.append(float(np.random.randint(0,10)))
 
-		# if self.y2[0] > 4000:
-		# 	self.sendPulseFES()
 		self.data_line1.setData(self.x, self.y1)
+
+		# Detect if steady state reached 
+		if ADC_ENABLED:
+			if not self.test_complete:
+				if (myADC.voltage) > 0:
+					if int(np.size(self.y1_storage)) > 51:
+						if not np.any(np.array(self.y1_storage[-50:]) < 0):
+							print('success')
+							self.test_complete = True
 
 	def add_data(self, data_buffer, new_data): 
 		"""Store new data in buffer."""
 		data_buffer = data_buffer[1:]
 		data_buffer.append(float(new_data))
 		return data_buffer
-	
-	def update_vals(self):
-		print(self.y1[-1])
-		if self.y1[-1] < 2:
-			print('here')
-			self.timer.stop()
-		else:
-			print('this is not working')
-			self.timer.start()
 
 	#### FES METHODS ####
 	def try_fes(self):
@@ -440,13 +439,16 @@ app = QtWidgets.QApplication(sys.argv)
 #setup FES
 myFES = Rehamove_DKC("None")
 
-#setup ADC
-i2c = busio.I2C(board.SCL, board.SDA)
-ads = ADS.ADS1115(i2c)
-# Create single-ended input on channel 0
-myADC = AnalogIn(ads, ADS.P0)
+if ADC_ENABLED:
+	#setup ADC
+	i2c = busio.I2C(board.SCL, board.SDA)
+	ads = ADS.ADS1115(i2c)
+	# Create single-ended input on channel 0
+	myADC = AnalogIn(ads, ADS.P0)
+else:
+	myADC = None
 
-w = Window1(myFES)
+w = Window1(myFES, myADC)
 w.show()
 myFES.close()
 sys.exit(app.exec_())

@@ -12,10 +12,13 @@ import time
 from dkc_rehamovelib.DKC_rehamovelib import * # Import our library
 from datetime import datetime
 
-# import busio
-# import board
-# import adafruit_ads1x15.ads1115 as ADS
-# from adafruit_ads1x15.analog_in import AnalogIn
+ADC_ENABLED = False
+
+if ADC_ENABLED:
+	import busio
+	import board
+	import adafruit_ads1x15.ads1115 as ADS
+	from adafruit_ads1x15.analog_in import AnalogIn
 
 SAMPLES = 1000
 SAMPLES_ = 100
@@ -45,7 +48,7 @@ class Window1(QDialog):
 			self.close()
 
 	def connect_to_main(self):
-		self.w2 = Window2(myFES)
+		self.w2 = Window2(myFES, myADC)
 		self.w2.comport_le.setText(self.comports[self.portSelect_cb.currentIndex()].device)
 		# print(str(self.comports[self.portSelect_cb.currentIndex()].device))
 		# myFES = Rehamove_DKC(str(self.comports[self.portSelect_cb.currentIndex()].device)); # Open USB port (on Windows) -- maybe will want a dropdown		
@@ -72,7 +75,7 @@ class Window1(QDialog):
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # https://www.youtube.com/watch?v=XXPNpdaK9WA
 class Window2(QtWidgets.QMainWindow):
-	def __init__(self, myFES, *args, **kwargs):
+	def __init__(self, myFES, myADC, *args, **kwargs):
 		super(Window2, self).__init__(*args, **kwargs)
 		uic.loadUi('resources/_CD_GUI_Main_Formed.ui', self) # load ui from Qt Designer
 		
@@ -81,14 +84,14 @@ class Window2(QtWidgets.QMainWindow):
 		self.channel_cb.addItems([' ', '1 (Red)', '2 (Blue)', '3 (Black)', '4 (White)'])
 		self.amp_sp.setRange(0, 50) #FES amplitude (mA)
 		self.amp_sp.setValue(15)		
-		self.dur_sp.setRange(0, 500) #FES duration (ms)
+		self.dur_sp.setRange(0, 500) #FES duration (us)
 		self.dur_sp.setValue(150)
 		self.f_sp.setRange(0, 10) #FES frequency (Hz)
 		self.f_sp.setValue(1)
 		self.np_sp.setRange(0, 100) #FES number of pulses (int)
 		self.np_sp.setValue(1)
 		
-		#Setup push and check buttons
+		#Connect push and check buttons
 		self.commit_pb.clicked.connect(self.update_lcd) #commit parameters to FES system
 		self.target_cb.toggled.connect(self.update_target) #add target line to plot
 		self.download_pb.clicked.connect(self.download) #download data 
@@ -137,7 +140,7 @@ class Window2(QtWidgets.QMainWindow):
 		self.pause_tb.setCheckable(True)
 		self.toolbar.addAction(self.pause_tb)
 
-	#### GUI and PLOTTING METHODS ####
+	#### GUI AND PLOTTING METHODS ####
 	def update_gui(self):
 		"""Master method called by timer to update plot."""
 		self.update_plot()
@@ -157,20 +160,28 @@ class Window2(QtWidgets.QMainWindow):
 			self.graphWidget.addItem(self.target)
 		else:
 			self.graphWidget.removeItem(self.target)
-
+			
 	def update_plot(self):
 		"""Update the plot with new data."""
-		self.x = self.add_data(self.x, (time.time()-self.time_start))
-		self.y1 = self.add_data(self.y1, (time.time()%60))
-		
-		self.x_storage.append(float((time.time()-self.time_start)))
-		self.y1_storage.append(float(time.time()%60))
-		self.data_line1.setData(self.x, self.y1)
-		# if (float(myADC.voltage) > self.max_value_reached):
-			# self.max_value_reached = (float(time.time()))
-			# self.committedNp_lbl.display(self.max_value_reached)
+		self.x = self.add_data(self.x, time.time()-self.time_start)
+		self.x_storage.append(float(time.time()-self.time_start))
 
-	def add_data(self, data_buffer, new_data):
+		if ADC_ENABLED:
+			self.y1 = self.add_data(self.y1, (myADC.voltage))
+			self.y1_storage.append(float(myADC.voltage))
+		else:
+			self.y1 = self.add_data(self.y1, np.random.randint(0, 10))
+			self.y1_storage.append(np.random.randint(0, 10))
+
+		self.data_line1.setData(self.x, self.y1)
+
+		#Add max value reached to plot
+		# if ADC_ENABLED:
+		# 	if (float(myADC.voltage) > self.max_value_reached):
+		# 		self.max_value_reached = (float(myADC.voltage))
+		# 		self.committedNp_lbl.display(self.max_value_reached)
+
+	def add_data(self, data_buffer, new_data): 
 		"""Store new data in buffer."""
 		data_buffer = data_buffer[1:]
 		data_buffer.append(float(new_data))
@@ -207,7 +218,7 @@ class Window2(QtWidgets.QMainWindow):
 				print('Hasomed Pulse Sent')
 				time.sleep(1.0/f)		
 
-	#### ADDITIONAL METHODS ####
+	#### MISCELLANEOUS METHODS ####
 	def connect_to_Window3(self):
 		"""Connect to Window3."""
 		self.w3 = Window3(self)
@@ -233,7 +244,7 @@ class Window2(QtWidgets.QMainWindow):
 			self.close()
 
 	def pause_plotting(self):
-		"""Pause plotting by stopping the background timer."""
+		"""Pause plotting by stopping background the timer."""
 		if self.pause_tb.isChecked():
 			self.timer.stop()
 		else:
@@ -272,17 +283,8 @@ class Window3(QtWidgets.QMainWindow):
 
 		#### Setup PYQTGRAPH ####
 		# Preassign data
-		self.chunkSize = 100
-		# Remove chunks after we have 10
-		self.maxChunks = 20
-		self.startTime = pg.ptime.time()
-		self.curves = []
-		self.data = np.empty((self.chunkSize+1,2))
-		self.ptr = 0
-
-		self.x_t = list(range(SAMPLES)) 
-		self.x = np.empty((SAMPLES, )) 
-		self.y1 = np.empty((SAMPLES, ))
+		self.x = list(range(SAMPLES)) 
+		self.y1 = [0] * SAMPLES
 		self.x_storage = []
 		self.y1_storage = []
 
@@ -294,18 +296,18 @@ class Window3(QtWidgets.QMainWindow):
 		self.graphWidget.setLabel('left', 'Torque (ft-lbs)')
 		self.graphWidget.setLabel('bottom', 'Samples')
 		self.graphWidget.showGrid(x=False, y=True)
-		# self.graphWidget.setXRange(-10, 0, padding=0)
+		# self.graphWidget.setYRange(0, 10, padding=1)
 		self.graphWidget.enableAutoRange('y', 0.95)
 		self.graphWidget.addLegend()		
 
 		#Prepare scrolling line
-		# pen_ref = pg.mkPen(color=(192,192,192), width=1, style=QtCore.Qt.DashLine)
+		pen_ref = pg.mkPen(color=(192,192,192), width=1, style=QtCore.Qt.DashLine)
 		pen1 = pg.mkPen(color=(0,123,184), width=2)
 		self.data_line1 = self.graphWidget.plot(self.x, self.y1, pen=pen1, name="Torque Sensor")
-
+		
 		#### Setup Timer ####
 		self.timer = QtCore.QTimer()
-		self.timer.setInterval(0)
+		self.timer.setInterval(1)
 		self.timer.timeout.connect(self.update_gui)
 		self.timer.start()
 
@@ -316,7 +318,6 @@ class Window3(QtWidgets.QMainWindow):
 		self.pause_tb.triggered.connect(self.pause_plotting)
 		self.pause_tb.setCheckable(True)
 		self.toolbar.addAction(self.pause_tb)
-
 
 	#### GUI AND PLOTTING METHODS ####
 	def update_gui(self):
@@ -334,70 +335,39 @@ class Window3(QtWidgets.QMainWindow):
                        labelOpts={'position':0.5, 'color': (200,0,0), 'fill': (200,200,200,50), 'movable': True})
 			self.graphWidget.addItem(self.target)
 		else:
-			self.graphWidget.removeItem(self.target)
-
+			self.graphWidget.removeItem(self.target)	
+		
 	def update_plot(self):
 		"""Update the plot with new data."""
-		# now = pg.ptime.time()
-		# for c in self.curves:
-		# 	c.setPos(-(now-self.startTime), 0)
-
-		# i = self.ptr % self.chunkSize #resets i to 0 when it reaches chunkSize
-		# if i == 0: #this happens once ever "chunkSize" cycles
-		# 	curve = self.graphWidget.plot(pen = pg.mkPen(color=(0,123,184), width=2))
-		# 	self.curves.append(curve)
-		# 	last = self.data[-1]
-		# 	self.data = np.empty((self.chunkSize+1,2))        
-		# 	self.data[0] = last
-		# 	while len(self.curves) > self.maxChunks:
-		# 		c = self.curves.pop(0)
-		# 		self.graphWidget.removeItem(c)
-		# else:
-		# 	curve = self.curves[-1]
-		# self.data[i+1,0] = now - self.startTime
-		# self.data[i+1,1] = np.random.rand(1) * time.time()%60
-		# curve.setData(x=self.data[:i+2, 0], y=self.data[:i+2, 1])
-		# self.ptr += 1
-
-		self.x = self.add_data(self.x, (time.time()-self.time_start))
-		self.y1 = self.add_data(self.y1, (np.random.rand(1) * time.time()%60))
-		
+		self.x = self.add_data(self.x, time.time()-self.time_start)
 		self.x_storage.append(float(time.time()-self.time_start))
-		self.y1_storage.append(float(time.time()%60))
+
+		if ADC_ENABLED:	
+			self.y1 = self.add_data(self.y1, (myADC.voltage))
+			self.y1_storage.append(float(myADC.voltage))
+		else:
+			self.y1 = self.add_data(self.y1, np.random.randint(0,10))
+			self.y1_storage.append(float(np.random.randint(0,10)))
+
 		self.data_line1.setData(self.x, self.y1)
-		# i = 1
 
-		# if not self.test_complete:
-		# 	if (myADC.voltage) > 0:
-		# 		if int(np.size(self.y1_storage)) > 51:
-		# 			if not np.any(np.array(self.y1_storage[-50:]) < 0):
-		# 				print('success')
-		# 				self.test_complete = True
-		# print(self.y1)
-		# if self.y1[0] > 4000:
-		# 	self.sendPulseFES()
-
-		# if self.y2[0] > 4000:
-		# 	self.sendPulseFES()
-		# self.data_line1.setData(self.x, self.y1)
+		# Detect if steady state reached 
+		if ADC_ENABLED:
+			if not self.test_complete:
+				if (myADC.voltage) > 0:
+					if int(np.size(self.y1_storage)) > 51:
+						if not np.any(np.array(self.y1_storage[-50:]) < 0):
+							print('success')
+							self.test_complete = True
 
 	def add_data(self, data_buffer, new_data): 
 		"""Store new data in buffer."""
 		data_buffer = data_buffer[1:]
 		data_buffer.append(float(new_data))
 		return data_buffer
-			
-	def update_vals(self):
-		print(self.y1[-1])
-		if self.y1[-1] < 2:
-			print('here')
-			self.timer.stop()
-		else:
-			print('this is not working')
-			self.timer.start()
-			
+
 	#### FES METHODS ####
-	def try_fes(self): 
+	def try_fes(self):
 		"""If FES is enabled, update values and send a pulse."""
 		if self.fesEnable_cb.isChecked():
 			self.update_and_send_pulse_fes()
@@ -425,9 +395,9 @@ class Window3(QtWidgets.QMainWindow):
 				print('Hasomed Pulse Sent')
 			else:
 				myFES.write_pulse(channelNum, [(dur,amp), (50, 0), (dur, -amp)])     # Send pulse every second
-				print('Hasomed Pulse Sent')
-				time.sleep(1.0/f)		
-	
+				print('Hasomedd Pulse Sent')
+				time.sleep(1.0/f)	
+
 	#### MISCELLANEOUS METHODS ####
 	def connect_to_main(self):
 		"""Connect to main GUI."""
@@ -453,7 +423,7 @@ class Window3(QtWidgets.QMainWindow):
 			self.timer.stop()
 		else:
 			self.timer.start()
-
+	
 	def key_press_event(self, event):
 		"""Handle key press event."""
 		if event.key() == Qt.Key_Escape:
@@ -469,13 +439,16 @@ app = QtWidgets.QApplication(sys.argv)
 #setup FES
 myFES = Rehamove_DKC("None")
 
-#setup ADC
-# i2c = busio.I2C(board.SCL, board.SDA)
-# ads = ADS.ADS1115(i2c)
-# Create single-ended input on channel 0
-# myADC = AnalogIn(ads, ADS.P0)
+if ADC_ENABLED:
+	#setup ADC
+	i2c = busio.I2C(board.SCL, board.SDA)
+	ads = ADS.ADS1115(i2c)
+	# Create single-ended input on channel 0
+	myADC = AnalogIn(ads, ADS.P0)
+else:
+	myADC = None
 
-w = Window1(myFES)
+w = Window1(myFES, myADC)
 w.show()
 myFES.close()
 sys.exit(app.exec_())
