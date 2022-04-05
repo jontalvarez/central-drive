@@ -11,6 +11,7 @@ import os
 import time
 from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
 from datetime import datetime
+import itertools
 
 ADC_ENABLED = False
 
@@ -122,7 +123,7 @@ class Window2(QtWidgets.QMainWindow):
 
     #### GUI AND PLOTTING METHODS ####
     def thread_update(self, data):
-        self.data_to_save.append(data - self.time_start)
+        self.data_to_save.append(float(data - self.time_start))
         
     def update_gui(self):
         """Master method called by timer to update plot."""
@@ -216,12 +217,21 @@ class Window2(QtWidgets.QMainWindow):
 
     def download(self):
         """Download data from GUI."""
-        default_filename = 'CD_' + datetime.now().strftime("%Y%m%d-%H%M%S")
+        default_filename = 'data/CD_' + datetime.now().strftime("%Y%m%d-%H%M%S")
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
-            data_to_save = list(zip(self.data_to_save))
-            np.savetxt(filename, data_to_save, delimiter=',')
+            # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y1_storage))
+            data_to_save = list(itertools.zip_longest(self.data_to_save, self.x_storage, self.y1_storage))
+            #create headers for file
+            header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
+            header2 = "FES Dur = " + str(self.committedDur_lbl.value())
+            header3 = "FES F = " + str(self.committedF_lbl.value())
+            header4 = "FES Np = " + str(self.committedNp_lbl.value())
+            header5 = "Thread Time (s), GUI Time (s), GUI Voltage (V)"
+            #save data to file
+            np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
+                header = '\n'.join([header1, header2, header3, header4, header5]))
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setText("Download completed successfully!")
@@ -247,13 +257,13 @@ class Window2(QtWidgets.QMainWindow):
 #         self.update_signal.emit(float(time.time()))
 
 class Thread(pg.QtCore.QThread):
-    newData = pg.QtCore.Signal(object)
+    newData = pg.QtCore.Signal(float)
     def run(self):
         while True:
             data = np.random.normal(size=100)
             # do NOT plot data from here!
-            self.newData.emit(time.time())
-            time.sleep(0.05)
+            self.newData.emit(float(time.time()))
+            # time.sleep(0.0)
 
 
 # SETUP:
