@@ -35,7 +35,7 @@ if ADC_ENABLED:
 SAMPLES = 1000
 SAMPLES_ = 100
 DATA_NB = 1
-THREAD_SPEED = 0.0
+THREAD_SPEED = 0.0005
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 
 
@@ -120,15 +120,16 @@ class Window2(QtWidgets.QMainWindow):
         #### Initialize Variables ####
         self.time_start = time.time()
         self.max_value_reached = 0
-        self.threadX = []
-        self.threadY = []
+        self.threadX = [0]
+        self.threadY = [0]
 
         #### Setup PYQTGRAPH ####
         # Preassign data
-        self.x = list(range(SAMPLES))
-        self.y1 = [0] * SAMPLES
-        self.x_storage = []
-        self.y1_storage = []
+        self.x = [0] * SAMPLES #list(range(SAMPLES))
+        self.y = [0] * SAMPLES
+        self.x_storage = [0]
+        self.y_storage = [0]
+        self.pyqtTimerTime = [0]
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
@@ -140,7 +141,7 @@ class Window2(QtWidgets.QMainWindow):
         self.graphWidget.setLabel('bottom', 'Samples')
         self.graphWidget.showGrid(x=False, y=True)
         # self.graphWidget.setYRange(0, 10, padding=1)
-        self.graphWidget.enableAutoRange('y', 0.95)
+        self.graphWidget.enableAutoRange('y', 1.25)
         self.graphWidget.addLegend()
 
         # Prepare scrolling line
@@ -148,7 +149,7 @@ class Window2(QtWidgets.QMainWindow):
                            style=QtCore.Qt.DashLine)
         pen1 = pg.mkPen(color=(0, 123, 184), width=2)
         self.data_line1 = self.graphWidget.plot(
-            self.x, self.y1, pen=pen1, name="Torque Sensor")
+            self.x, self.y, pen=pen1, name="Torque Sensor")
 
         #### Setup Timer ####
         self.timer = QtCore.QTimer()
@@ -197,17 +198,19 @@ class Window2(QtWidgets.QMainWindow):
 
     def update_plot(self):
         """Update the plot with new data."""
-        self.x = self.add_data(self.x, time.time()-self.time_start)
-        self.x_storage.append(float(time.time()-self.time_start))
+        temp_x = self.threadX[-1]
+        temp_y = self.threadY[-1]
+        
+        self.x = self.add_data(self.x, temp_x)
+        self.x_storage.append(temp_x)
 
-        if ADC_ENABLED:
-            self.y1 = self.add_data(self.y1, (myADC.voltage))
-            self.y1_storage.append(float(myADC.voltage))
-        else:
-            self.y1 = self.add_data(self.y1, np.random.randint(0, 10))
-            self.y1_storage.append(np.random.randint(0, 10))
+        self.y = self.add_data(self.y, temp_y)
+        self.y_storage.append(temp_y)
 
-        self.data_line1.setData(self.x, self.y1)
+        self.pyqtTimerTime.append(time.time() - self.time_start) #stores time of loop access
+
+        self.graphWidget.setXRange(self.x[-100], self.x[-1], padding=1)
+        self.data_line1.setData(self.x, self.y)
 
         # Add max value reached to plot
         # if ADC_ENABLED:
@@ -271,14 +274,14 @@ class Window2(QtWidgets.QMainWindow):
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
-            # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y1_storage))
-            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y1_storage))
+            # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y_storage))
+            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y_storage, self.pyqtTimerTime))
             #create headers for file
             header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
             header3 = "FES F = " + str(self.committedF_lbl.value())
             header4 = "FES Np = " + str(self.committedNp_lbl.value())
-            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V)"
+            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s)"
             #save data to file
             np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
                 header = '\n'.join([header1, header2, header3, header4, header5]))
@@ -319,8 +322,9 @@ class Window3(QtWidgets.QMainWindow):
         self.w22 = w2
         self.test_complete = False
         self.time_start = time.time()
-        self.threadX = []
-        self.threadY = []
+        self.threadX = [0]
+        self.threadY = [0]
+        self.pyqtTimerTime = [0]
 
         #### Setup GUI Widgets ####
         # Grab values commited to Hasomed Device from Window2
@@ -341,10 +345,11 @@ class Window3(QtWidgets.QMainWindow):
 
         #### Setup PYQTGRAPH ####
         # Preassign data
-        self.x = list(range(SAMPLES))
-        self.y1 = [0] * SAMPLES
-        self.x_storage = []
-        self.y1_storage = []
+        # self.x = list(range(SAMPLES))
+        self.x = [0] * SAMPLES
+        self.y = [0] * SAMPLES
+        self.x_storage = [0]
+        self.y_storage = [0]
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
@@ -355,7 +360,7 @@ class Window3(QtWidgets.QMainWindow):
         self.graphWidget.setLabel('bottom', 'Samples')
         self.graphWidget.showGrid(x=False, y=True)
         # self.graphWidget.setYRange(0, 10, padding=1)
-        self.graphWidget.enableAutoRange('y', 0.95)
+        self.graphWidget.enableAutoRange('y', 1.25)
         self.graphWidget.addLegend()
 
         # Prepare scrolling line
@@ -363,7 +368,7 @@ class Window3(QtWidgets.QMainWindow):
                            style=QtCore.Qt.DashLine)
         pen1 = pg.mkPen(color=(0, 123, 184), width=2)
         self.data_line1 = self.graphWidget.plot(
-            self.x, self.y1, pen=pen1, name="Torque Sensor")
+            self.x, self.y, pen=pen1, name="Torque Sensor")
 
         #### Setup Timer ####
         self.timer = QtCore.QTimer()
@@ -409,24 +414,26 @@ class Window3(QtWidgets.QMainWindow):
 
     def update_plot(self):
         """Update the plot with new data."""
-        self.x = self.add_data(self.x, time.time()-self.time_start)
-        self.x_storage.append(float(time.time()-self.time_start))
+        temp_x = self.threadX[-1]
+        temp_y = self.threadY[-1]
+        
+        self.x = self.add_data(self.x, temp_x)
+        self.x_storage.append(temp_x)
 
-        if ADC_ENABLED:
-            self.y1 = self.add_data(self.y1, (myADC.voltage))
-            self.y1_storage.append(float(myADC.voltage))
-        else:
-            self.y1 = self.add_data(self.y1, np.random.randint(0, 10))
-            self.y1_storage.append(float(np.random.randint(0, 10)))
+        self.y = self.add_data(self.y, temp_y)
+        self.y_storage.append(temp_y)
 
-        self.data_line1.setData(self.x, self.y1)
+        self.pyqtTimerTime.append(time.time() - self.time_start) #stores time of loop access
+
+        self.graphWidget.setXRange(self.x[-100], self.x[-1], padding=1)
+        self.data_line1.setData(self.x, self.y)
 
         # Detect if steady state reached
         if ADC_ENABLED:
             if not self.test_complete:
                 if (myADC.voltage) > 0:
-                    if int(np.size(self.y1_storage)) > 51:
-                        if not np.any(np.array(self.y1_storage[-50:]) < 0):
+                    if int(np.size(self.y_storage)) > 51:
+                        if not np.any(np.array(self.y_storage[-50:]) < 0):
                             print('success')
                             self.test_complete = True
 
@@ -486,14 +493,14 @@ class Window3(QtWidgets.QMainWindow):
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
-            # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y1_storage))
-            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y1_storage))
+            # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y_storage))
+            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y_storage, self.pyqtTimerTime))
             #create headers for file
             header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
             header3 = "FES F = " + str(self.committedF_lbl.value())
             header4 = "FES Np = " + str(self.committedNp_lbl.value())
-            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V)"
+            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s)"
             #save data to file
             np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
                 header = '\n'.join([header1, header2, header3, header4, header5]))
@@ -525,6 +532,7 @@ class DataLoggingThread(pg.QtCore.QThread):
     newData = pg.QtCore.Signal(list)
     def run(self):
         while True:
+            time.sleep(THREAD_SPEED)
             if ADC_ENABLED:
                 x = float(time.time())
                 y = float(myADC.voltage)
@@ -533,7 +541,6 @@ class DataLoggingThread(pg.QtCore.QThread):
                 x = float(time.time())
                 y = float(np.random.random())
             self.newData.emit([x, y])
-            time.sleep(THREAD_SPEED)
 
 
 # SETUP:
