@@ -117,7 +117,7 @@ class Window2(QtWidgets.QMainWindow):
         # self.worker.start()
         # self.worker.update_signal.connect(self.signal_emitted_thread)
 
-        thread = Thread(parent = self)
+        thread = DataLoggingThread(parent = self)
         thread.newData.connect(self.thread_update)
         thread.start()
 
@@ -216,6 +216,7 @@ class Window2(QtWidgets.QMainWindow):
         print('here')
 
     def download(self):
+        self.timer.stop()
         """Download data from GUI."""
         default_filename = 'data/CD_' + datetime.now().strftime("%Y%m%d-%H%M%S")
         filename, _ = QFileDialog.getSaveFileName(
@@ -237,6 +238,7 @@ class Window2(QtWidgets.QMainWindow):
             msg.setText("Download completed successfully!")
             msg.setWindowTitle("Success")
             msg.exec()
+        self.timer.start()
 
     def key_press_event(self, event):
         """Handle key press events."""
@@ -256,14 +258,14 @@ class Window2(QtWidgets.QMainWindow):
 #     def run(self):
 #         self.update_signal.emit(float(time.time()))
 
-class Thread(pg.QtCore.QThread):
+class DataLoggingThread(pg.QtCore.QThread):
     newData = pg.QtCore.Signal(float)
     def run(self):
         while True:
             data = np.random.normal(size=100)
             # do NOT plot data from here!
             self.newData.emit(float(time.time()))
-            # time.sleep(0.0)
+            time.sleep(0.0005)
 
 
 # SETUP:
