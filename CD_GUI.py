@@ -46,7 +46,7 @@ os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 class Window1(QDialog):
-    def __init__(self, myFES, *args, **kwargs):
+    def __init__(self, myFES, myADC, *args, **kwargs):
         super().__init__(*args, **kwargs)
         uic.loadUi('resources/_CD_GUI_Landing_Formed.ui', self)
 
