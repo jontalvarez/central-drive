@@ -24,7 +24,7 @@ from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
 # INITIALIZE VARIABLES
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
-ADC_ENABLED = False
+ADC_ENABLED = True
 
 if ADC_ENABLED:
     import busio
@@ -158,9 +158,9 @@ class Window2(QtWidgets.QMainWindow):
         self.timer.start()
         
         #### Data Logging Thread ####
-        thread = DataLoggingThread(parent = self)
-        thread.newData.connect(self.thread_update)
-        thread.start()
+        self.thread = DataLoggingThread(parent = self)
+        self.thread.newData.connect(self.thread_update)
+        self.thread.start()
 
         #### Miscellaneous ####
         # Setup a PAUSE button in a toolbar
@@ -376,10 +376,10 @@ class Window3(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.update_gui)
         self.timer.start()
 
-        #### Thread for Data Logging ####
-        thread = DataLoggingThread(parent=self)
-        thread.newData.connect(self.thread_update)
-        thread.start()
+#         #### Thread for Data Logging ####
+#         thread = DataLoggingThread(parent=self)
+#         thread.newData.connect(self.thread_update)
+#         thread.start()
 
         #### Miscellaneous ####
         # Setup a PAUSE button in a toolbar
@@ -394,10 +394,10 @@ class Window3(QtWidgets.QMainWindow):
         """Master method called by timer to update plot."""
         self.update_plot()
 
-    def thread_update(self, data):
-        """Method called by thread to continuously append data"""
-        self.threadX.append(float(data[0] - self.time_start)) #time
-        self.threadY.append(float(data[1])) #voltage
+#     def thread_update(self, data):
+#         """Method called by thread to continuously append data"""
+#         self.threadX.append(float(data[0] - self.time_start)) #time
+#         self.threadY.append(float(data[1])) #voltage
 
     def update_lcd(self):
         """Update the FES parameters to reflect commited values."""
@@ -414,8 +414,8 @@ class Window3(QtWidgets.QMainWindow):
 
     def update_plot(self):
         """Update the plot with new data."""
-        temp_x = self.threadX[-1]
-        temp_y = self.threadY[-1]
+        temp_x = self.w22.threadX[-1]
+        temp_y = self.w22.threadY[-1]
         
         self.x = self.add_data(self.x, temp_x)
         self.x_storage.append(temp_x)
@@ -431,7 +431,7 @@ class Window3(QtWidgets.QMainWindow):
         # Detect if steady state reached
         if ADC_ENABLED:
             if not self.test_complete:
-                if (myADC.voltage) > 0:
+                if temp_y > 0:
                     if int(np.size(self.y_storage)) > 51:
                         if not np.any(np.array(self.y_storage[-50:]) < 0):
                             print('success')
