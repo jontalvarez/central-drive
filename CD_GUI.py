@@ -35,6 +35,7 @@ if ADC_ENABLED:
 SAMPLES = 1000
 SAMPLES_ = 100
 DATA_NB = 1
+THREAD_SPEED = 0.0
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 
 
@@ -119,7 +120,8 @@ class Window2(QtWidgets.QMainWindow):
         #### Initialize Variables ####
         self.time_start = time.time()
         self.max_value_reached = 0
-        self.data_to_save = []
+        self.threadX = []
+        self.threadY = []
 
         #### Setup PYQTGRAPH ####
         # Preassign data
@@ -174,7 +176,8 @@ class Window2(QtWidgets.QMainWindow):
 
     def thread_update(self, data):
         """Method called by thread to continuously append data"""
-        self.data_to_save.append(float(data - self.time_start))
+        self.threadX.append(float(data[0] - self.time_start)) #time
+        self.threadY.append(float(data[1])) #voltage
 
     def update_lcd(self):
         """Update the FES parameters to reflect commited values."""
@@ -269,13 +272,13 @@ class Window2(QtWidgets.QMainWindow):
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
             # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y1_storage))
-            data_to_save = list(itertools.zip_longest(self.data_to_save, self.x_storage, self.y1_storage))
+            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y1_storage))
             #create headers for file
             header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
             header3 = "FES F = " + str(self.committedF_lbl.value())
             header4 = "FES Np = " + str(self.committedNp_lbl.value())
-            header5 = "Thread Time (s), GUI Time (s), GUI Voltage (V)"
+            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V)"
             #save data to file
             np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
                 header = '\n'.join([header1, header2, header3, header4, header5]))
@@ -316,7 +319,8 @@ class Window3(QtWidgets.QMainWindow):
         self.w22 = w2
         self.test_complete = False
         self.time_start = time.time()
-        self.data_to_save = []
+        self.threadX = []
+        self.threadY = []
 
         #### Setup GUI Widgets ####
         # Grab values commited to Hasomed Device from Window2
@@ -344,8 +348,7 @@ class Window3(QtWidgets.QMainWindow):
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
-        self.findChild(QWidget, "TorquePlot").layout(
-        ).addWidget(self.graphWidget)
+        self.findChild(QWidget, "TorquePlot").layout().addWidget(self.graphWidget)
         self.graphWidget.setBackground('w')
         self.graphWidget.setTitle("Central Drive Estimation")
         self.graphWidget.setLabel('left', 'Torque (ft-lbs)')
@@ -388,7 +391,8 @@ class Window3(QtWidgets.QMainWindow):
 
     def thread_update(self, data):
         """Method called by thread to continuously append data"""
-        self.data_to_save.append(float(data - self.time_start))
+        self.threadX.append(float(data[0] - self.time_start)) #time
+        self.threadY.append(float(data[1])) #voltage
 
     def update_lcd(self):
         """Update the FES parameters to reflect commited values."""
@@ -483,13 +487,13 @@ class Window3(QtWidgets.QMainWindow):
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
             # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y1_storage))
-            data_to_save = list(itertools.zip_longest(self.data_to_save, self.x_storage, self.y1_storage))
+            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y1_storage))
             #create headers for file
             header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
             header3 = "FES F = " + str(self.committedF_lbl.value())
             header4 = "FES Np = " + str(self.committedNp_lbl.value())
-            header5 = "Thread Time (s), GUI Time (s), GUI Voltage (V)"
+            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V)"
             #save data to file
             np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
                 header = '\n'.join([header1, header2, header3, header4, header5]))
@@ -518,13 +522,18 @@ class Window3(QtWidgets.QMainWindow):
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 class DataLoggingThread(pg.QtCore.QThread):
-    newData = pg.QtCore.Signal(float)
+    newData = pg.QtCore.Signal(list)
     def run(self):
         while True:
-            data = np.random.normal(size=100)
-            # do NOT plot data from here!
-            self.newData.emit(float(time.time()))
-            time.sleep(0.0005)
+            if ADC_ENABLED:
+                x = float(time.time())
+                y = float(myADC.voltage)
+            else:
+                # do NOT plot data from here!
+                x = float(time.time())
+                y = float(np.random.random())
+            self.newData.emit([x, y])
+            time.sleep(THREAD_SPEED)
 
 
 # SETUP:
