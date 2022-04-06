@@ -35,7 +35,7 @@ if ADC_ENABLED:
 SAMPLES = 1000
 SAMPLES_ = 100
 DATA_NB = 1
-THREAD_SPEED = 0.0005
+THREAD_SPEED = 0
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 
 
@@ -122,7 +122,9 @@ class Window2(QtWidgets.QMainWindow):
         self.max_value_reached = 0
         self.threadX = [0]
         self.threadY = [0]
-
+        self.windowFlag = 0 #0 if Window 2, 1 if Window 3
+        self.windowFlagList = [0]
+        
         #### Setup PYQTGRAPH ####
         # Preassign data
         self.x = [0] * SAMPLES #list(range(SAMPLES))
@@ -140,8 +142,9 @@ class Window2(QtWidgets.QMainWindow):
         self.graphWidget.setLabel('left', 'Torque (ft-lbs)')
         self.graphWidget.setLabel('bottom', 'Samples')
         self.graphWidget.showGrid(x=False, y=True)
-        # self.graphWidget.setYRange(0, 10, padding=1)
-        self.graphWidget.enableAutoRange('y', 1.25)
+        #self.graphWidget.setYRange(0, 10, padding=1)
+        self.graphWidget.enableAutoRange(axis = 'y')
+        self.graphWidget.setAutoVisible(y = True)
         self.graphWidget.addLegend()
 
         # Prepare scrolling line
@@ -153,14 +156,14 @@ class Window2(QtWidgets.QMainWindow):
 
         #### Setup Timer ####
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(10)
+        self.timer.setInterval(0)
         self.timer.timeout.connect(self.update_gui)
         self.timer.start()
         
         #### Data Logging Thread ####
-        self.thread = DataLoggingThread(parent = self)
-        self.thread.newData.connect(self.thread_update)
-        self.thread.start()
+        thread = DataLoggingThread(parent = self)
+        thread.newData.connect(self.thread_update)
+        thread.start()
 
         #### Miscellaneous ####
         # Setup a PAUSE button in a toolbar
@@ -179,6 +182,7 @@ class Window2(QtWidgets.QMainWindow):
         """Method called by thread to continuously append data"""
         self.threadX.append(float(data[0] - self.time_start)) #time
         self.threadY.append(float(data[1])) #voltage
+        self.windowFlagList.append(self.windowFlag)
 
     def update_lcd(self):
         """Update the FES parameters to reflect commited values."""
@@ -264,6 +268,7 @@ class Window2(QtWidgets.QMainWindow):
     def connect_to_Window3(self):
         """Connect to Window3."""
         self.w3 = Window3(self)
+        self.windowFlag = 1
         self.close()
         self.w3.show()
 
@@ -275,13 +280,13 @@ class Window2(QtWidgets.QMainWindow):
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
             # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y_storage))
-            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y_storage, self.pyqtTimerTime))
+            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y_storage, self.pyqtTimerTime, self.windowFlagList))
             #create headers for file
             header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
             header3 = "FES F = " + str(self.committedF_lbl.value())
             header4 = "FES Np = " + str(self.committedNp_lbl.value())
-            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s)"
+            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s), 'Window Flag"
             #save data to file
             np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
                 header = '\n'.join([header1, header2, header3, header4, header5]))
@@ -322,8 +327,6 @@ class Window3(QtWidgets.QMainWindow):
         self.w22 = w2
         self.test_complete = False
         self.time_start = time.time()
-        self.threadX = [0]
-        self.threadY = [0]
         self.pyqtTimerTime = [0]
 
         #### Setup GUI Widgets ####
@@ -360,7 +363,8 @@ class Window3(QtWidgets.QMainWindow):
         self.graphWidget.setLabel('bottom', 'Samples')
         self.graphWidget.showGrid(x=False, y=True)
         # self.graphWidget.setYRange(0, 10, padding=1)
-        self.graphWidget.enableAutoRange('y', 1.25)
+        self.graphWidget.enableAutoRange(axis = 'y')
+        self.graphWidget.setAutoVisible(y = True)
         self.graphWidget.addLegend()
 
         # Prepare scrolling line
@@ -376,11 +380,6 @@ class Window3(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.update_gui)
         self.timer.start()
 
-#         #### Thread for Data Logging ####
-#         thread = DataLoggingThread(parent=self)
-#         thread.newData.connect(self.thread_update)
-#         thread.start()
-
         #### Miscellaneous ####
         # Setup a PAUSE button in a toolbar
         self.toolbar = self.addToolBar("Pause")
@@ -393,11 +392,6 @@ class Window3(QtWidgets.QMainWindow):
     def update_gui(self):
         """Master method called by timer to update plot."""
         self.update_plot()
-
-#     def thread_update(self, data):
-#         """Method called by thread to continuously append data"""
-#         self.threadX.append(float(data[0] - self.time_start)) #time
-#         self.threadY.append(float(data[1])) #voltage
 
     def update_lcd(self):
         """Update the FES parameters to reflect commited values."""
@@ -483,6 +477,7 @@ class Window3(QtWidgets.QMainWindow):
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
         """Connect to main GUI."""
+        self.w22.windowFlag = 0
         self.w22.show()
         self.close()
 
@@ -494,13 +489,13 @@ class Window3(QtWidgets.QMainWindow):
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
             # data_to_save = list(zip(self.data_to_save, self.x_storage, self.y_storage))
-            data_to_save = list(itertools.zip_longest(self.threadX, self.threadY, self.x_storage, self.y_storage, self.pyqtTimerTime))
+            data_to_save = list(itertools.zip_longest(self.w22.threadX, self.w22.threadY, self.x_storage, self.y_storage, self.pyqtTimerTime, self.w22.windowFlagList))
             #create headers for file
             header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
             header3 = "FES F = " + str(self.committedF_lbl.value())
             header4 = "FES Np = " + str(self.committedNp_lbl.value())
-            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s)"
+            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s), Window Flag"
             #save data to file
             np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
                 header = '\n'.join([header1, header2, header3, header4, header5]))
@@ -542,7 +537,6 @@ class DataLoggingThread(pg.QtCore.QThread):
                 y = float(np.random.random())
             self.newData.emit([x, y])
 
-
 # SETUP:
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
@@ -556,6 +550,7 @@ if ADC_ENABLED:
     # setup ADC
     i2c = busio.I2C(board.SCL, board.SDA)
     ads = ADS.ADS1115(i2c)
+    ads.data_rate = 860
     # Create single-ended input on channel 0
     myADC = AnalogIn(ads, ADS.P0)
 else:
