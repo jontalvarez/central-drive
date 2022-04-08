@@ -24,7 +24,7 @@ from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
 # INITIALIZE VARIABLES
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
-ADC_ENABLED = True
+ADC_ENABLED = False
 
 if ADC_ENABLED:
     import busio
@@ -135,28 +135,24 @@ class Window2(QtWidgets.QMainWindow):
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
-        self.findChild(QWidget, "TorquePlot").layout(
-        ).addWidget(self.graphWidget)
+        self.findChild(QWidget, "TorquePlot").layout().addWidget(self.graphWidget)
         self.graphWidget.setBackground('w')
         self.graphWidget.setTitle("Central Drive Estimation")
         self.graphWidget.setLabel('left', 'Torque (ft-lbs)')
-        self.graphWidget.setLabel('bottom', 'Samples')
+        self.graphWidget.setLabel('bottom', 'Time (s)')
         self.graphWidget.showGrid(x=False, y=True)
-        #self.graphWidget.setYRange(0, 10, padding=1)
+        # self.graphWidget.setYRange(0, 10, padding=1)
         self.graphWidget.enableAutoRange(axis = 'y')
         self.graphWidget.setAutoVisible(y = True)
         self.graphWidget.addLegend()
 
         # Prepare scrolling line
-        pen_ref = pg.mkPen(color=(192, 192, 192), width=1,
-                           style=QtCore.Qt.DashLine)
-        pen1 = pg.mkPen(color=(0, 123, 184), width=2)
-        self.data_line1 = self.graphWidget.plot(
-            self.x, self.y, pen=pen1, name="Torque Sensor")
+        pen1 = pg.mkPen(color=([228, 26, 28]), width=2.5)
+        self.data_line1 = self.graphWidget.plot(self.x, self.y, pen=pen1, name="Torque Sensor")
 
         #### Setup Timer ####
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(0)
+        self.timer.setInterval(10)
         self.timer.timeout.connect(self.update_gui)
         self.timer.start()
         
@@ -164,7 +160,7 @@ class Window2(QtWidgets.QMainWindow):
         thread = DataLoggingThread(parent = self)
         thread.newData.connect(self.thread_update)
         thread.start()
-
+        
         #### Miscellaneous ####
         # Setup a PAUSE button in a toolbar
         self.toolbar = self.addToolBar("Pause")
@@ -213,7 +209,7 @@ class Window2(QtWidgets.QMainWindow):
 
         self.pyqtTimerTime.append(time.time() - self.time_start) #stores time of loop access
 
-        self.graphWidget.setXRange(self.x[-100], self.x[-1], padding=1)
+        self.graphWidget.setXRange(self.x[-1]-10, self.x[-1]+2.5)
         self.data_line1.setData(self.x, self.y)
 
         # Add max value reached to plot
@@ -362,21 +358,17 @@ class Window3(QtWidgets.QMainWindow):
         self.graphWidget.setLabel('left', 'Torque (ft-lbs)')
         self.graphWidget.setLabel('bottom', 'Samples')
         self.graphWidget.showGrid(x=False, y=True)
-        # self.graphWidget.setYRange(0, 10, padding=1)
         self.graphWidget.enableAutoRange(axis = 'y')
         self.graphWidget.setAutoVisible(y = True)
         self.graphWidget.addLegend()
 
         # Prepare scrolling line
-        pen_ref = pg.mkPen(color=(192, 192, 192), width=1,
-                           style=QtCore.Qt.DashLine)
-        pen1 = pg.mkPen(color=(0, 123, 184), width=2)
-        self.data_line1 = self.graphWidget.plot(
-            self.x, self.y, pen=pen1, name="Torque Sensor")
+        pen1 = pg.mkPen(color=([228, 26, 28]), width=2.5)
+        self.data_line1 = self.graphWidget.plot(self.x, self.y, pen=pen1, name="Torque Sensor")
 
         #### Setup Timer ####
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(1)
+        self.timer.setInterval(10)
         self.timer.timeout.connect(self.update_gui)
         self.timer.start()
 
@@ -419,7 +411,7 @@ class Window3(QtWidgets.QMainWindow):
 
         self.pyqtTimerTime.append(time.time() - self.time_start) #stores time of loop access
 
-        self.graphWidget.setXRange(self.x[-100], self.x[-1], padding=1)
+        self.graphWidget.setXRange(self.x[-1]-10, self.x[-1]+2.5)
         self.data_line1.setData(self.x, self.y)
 
         # Detect if steady state reached
