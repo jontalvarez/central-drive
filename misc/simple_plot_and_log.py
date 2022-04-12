@@ -17,9 +17,6 @@ import numpy as np
 import itertools
 import serial.tools.list_ports
 from datetime import datetime
-#FES Imports
-from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
-
 
 # INITIALIZE VARIABLES
 # -----------------------------------------------------------------------------------------------------------------------------------------
@@ -45,34 +42,16 @@ os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # https://www.youtube.com/watch?v=XXPNpdaK9WA
-class Window2(QtWidgets.QMainWindow):
-    def __init__(self, myFES, myADC, *args, **kwargs):
-        super(Window2, self).__init__(*args, **kwargs)
-        uic.loadUi('resources/_CD_GUI_Main_Formed.ui',
+class Window1(QtWidgets.QMainWindow):
+    def __init__(self, myADC, *args, **kwargs):
+        super(Window1, self).__init__(*args, **kwargs)
+        uic.loadUi('resources/_Simple_Plotting_Interface_Formed.ui',
                    self)  # load ui from Qt Designer
 
         #### Setup GUI Widgets ####
-        # Setup FES Channels and Parameters
-        self.channel_cb.addItems(
-            [' ', '1 (Red)', '2 (Blue)', '3 (Black)', '4 (White)'])
-        self.amp_sp.setRange(0, 50)  # FES amplitude (mA)
-        self.amp_sp.setValue(15)
-        self.dur_sp.setRange(0, 500)  # FES duration (us)
-        self.dur_sp.setValue(150)
-        self.f_sp.setRange(0, 10)  # FES frequency (Hz)
-        self.f_sp.setValue(1)
-        self.np_sp.setRange(0, 100)  # FES number of pulses (int)
-        self.np_sp.setValue(1)
-
         # Connect push and check buttons
         # commit parameters to FES system
-        self.commit_pb.clicked.connect(self.update_lcd)
-        self.target_cb.toggled.connect(
-            self.update_target)  # add target line to plot
         self.download_pb.clicked.connect(self.download)  # download data
-        self.sendPulse_pb.clicked.connect(
-            self.try_fes)  # send a single FES burst
-        self.CD_pb.clicked.connect(self.connect_to_Window3)  # go to CD window
 
         #### Initialize Variables ####
         self.time_start = time.time()
@@ -92,36 +71,20 @@ class Window2(QtWidgets.QMainWindow):
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
-        self.findChild(QWidget, "TorquePlot").layout(
-        ).addWidget(self.graphWidget)
+        self.findChild(QWidget, "TorquePlot").layout().addWidget(self.graphWidget)
         self.graphWidget.setBackground('w')
         self.graphWidget.setTitle("Central Drive Estimation")
         self.graphWidget.setLabel('left', 'Torque (ft-lbs)')
-        self.graphWidget.setLabel('bottom', 'Samples')
+        self.graphWidget.setLabel('bottom', 'Time (s)')
         self.graphWidget.showGrid(x=False, y=True)
-        #self.graphWidget.setYRange(0, 10, padding=1)
-        # self.graphWidget.enableAutoRange(axis = 'y')
+        # self.graphWidget.setYRange(0, 10, padding=1)
+        self.graphWidget.enableAutoRange(axis = 'y')
         self.graphWidget.setAutoVisible(y = True)
         self.graphWidget.addLegend()
 
-        ## Define new variabels
-        self.chunkSize = 100
-        # Remove chunks after we have 10
-        self.maxChunks = 10
-        self.startTime = time.time()
-        self.graphWidget.setXRange(-10, 0)
-        self.curves = []
-        self.data5 = np.empty((self.chunkSize+1,2))
-        self.ptr5 = 0
-        self.lastTime = time.perf_counter()
-        self.fps = None
-
         # Prepare scrolling line
-        pen_ref = pg.mkPen(color=(192, 192, 192), width=1,
-                           style=QtCore.Qt.DashLine)
-        pen1 = pg.mkPen(color=(0, 123, 184), width=2)
-        self.data_line1 = self.graphWidget.plot(
-            self.x, self.y, pen=pen1, name="Torque Sensor")
+        pen1 = pg.mkPen(color=([228, 26, 28]), width=2.5)
+        self.data_line1 = self.graphWidget.plot(self.x, self.y, pen=pen1, name="Torque Sensor")
 
         #### Setup Timer ####
         self.timer = QtCore.QTimer()
@@ -133,7 +96,7 @@ class Window2(QtWidgets.QMainWindow):
         thread = DataLoggingThread(parent = self)
         thread.newData.connect(self.thread_update)
         thread.start()
-
+        
         #### Miscellaneous ####
         # Setup a PAUSE button in a toolbar
         self.toolbar = self.addToolBar("Pause")
@@ -145,9 +108,7 @@ class Window2(QtWidgets.QMainWindow):
     #### GUI AND PLOTTING METHODS ####
     def update_gui(self):
         """Master method called by timer to update plot."""
-        self.x = self.x[1:]  # Remove the first y element.
-        self.x.append(self.x[-1] + 1)  # Add a new +1 sample 
-        self.update_plot_2()
+        self.update_plot()
 
     def thread_update(self, data):
         """Method called by thread to continuously append data"""
@@ -171,43 +132,14 @@ class Window2(QtWidgets.QMainWindow):
         else:
             self.graphWidget.removeItem(self.target)
 
-    def update_plot_2(self):
-        now = time.time()
-        for c in self.curves:
-            c.setPos(-(now-self.startTime), 0)
-        
-        i = self.ptr5 % self.chunkSize
-        if i == 0:
-            curve = self.graphWidget.plot()
-            self.curves.append(curve)
-            last = self.data5[-1]
-            self.data5 = np.empty((self.chunkSize+1,2))        
-            self.data5[0] = last
-            while len(self.curves) > self.maxChunks:
-                c = self.curves.pop(0)
-                self.graphWidget.removeItem(c)
-        else:
-            curve = self.curves[-1]
-        self.data5[i+1,0] = now - self.startTime
-        self.data5[i+1,1] = np.random.normal()
-        curve.setData(x=self.data5[:i+2, 0], y=self.data5[:i+2, 1])
-        self.ptr5 += 1
-
-        # now = time.perf_counter()
-        # dt = now - self.lastTime
-        # self.lastTime = now
-        # if self.fps is None:
-        #     self.fps = 1.0/dt
-        # else:
-        #     s = np.clip(dt*3., 0, 1)
-        #     self.fps = self.fps * (1-s) + (1.0/dt) * s
-        # self.graphWidget.setTitle('%0.2f fps' % self.fps)
-
     def update_plot(self):
         """Update the plot with new data."""
         temp_x = self.threadX[-1]
         temp_y = self.threadY[-1]
         
+        if ADC_ENABLED:
+            temp_y = -95.64 * temp_y + 113.3 #convert voltage to torque
+
         self.x = self.add_data(self.x, temp_x)
         self.x_storage.append(temp_x)
 
@@ -216,73 +148,19 @@ class Window2(QtWidgets.QMainWindow):
 
         self.pyqtTimerTime.append(time.time() - self.time_start) #stores time of loop access
 
-        self.graphWidget.setXRange(self.x[-100], self.x[-1], padding=1)
+        self.graphWidget.setXRange(self.x[-1]-10, self.x[-1]+2.5)
         self.data_line1.setData(self.x, self.y)
 
         # Add max value reached to plot
-        # if ADC_ENABLED:
-        # 	if (float(myADC.voltage) > self.max_value_reached):
-        # 		self.max_value_reached = (float(myADC.voltage))
-        # 		self.committedNp_lbl.display(self.max_value_reached)
-        now = time.perf_counter()
-        dt = now - self.lastTime
-        self.lastTime = now
-        if self.fps is None:
-            self.fps = 1.0/dt
-        else:
-            s = np.clip(dt*3., 0, 1)
-            self.fps = self.fps * (1-s) + (1.0/dt) * s
-        self.graphWidget.setTitle('%0.2f fps' % self.fps)
+        if (float(temp_y) > self.max_value_reached):
+            self.max_value_reached = temp_y
+            self.maxVal_lcd.display(self.max_value_reached)
 
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
         data_buffer = data_buffer[1:]
         data_buffer.append(float(new_data))
         return data_buffer
-
-    #### FES METHODS ####
-    def try_fes(self):
-        """If FES is enabled, update values and send a pulse."""
-        if self.fesEnable_cb.isChecked():
-            self.update_and_send_pulse_fes()
-        else:
-            pass
-
-    def update_and_send_pulse_fes(self):
-        """Update FES parameters and send pulse."""
-        amp = int(self.committedAmp_lbl.value())  # [mA]
-        dur = int(self.committedDur_lbl.value())  # [us]
-        f = int(self.committedF_lbl.value())  # hz
-        n_pulse = int(self.committedNp_lbl.value())
-        try:
-            # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-            channelNum = int(self.channel_cb.currentText()[0])
-            self.send_pulse_fes(amp, dur, f, n_pulse, channelNum)
-        except:
-            print('No Channel Selected')
-
-    def send_pulse_fes(self, amp, dur, f, n_pulse, channelNum):
-        """Send pulse to FES."""
-        for i in range(0, n_pulse):
-            if f == 1:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomed Pulse Sent')
-            else:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomed Pulse Sent')
-                time.sleep(1.0/f)
-
-    #### MISCELLANEOUS METHODS ####
-    def connect_to_Window3(self):
-        """Connect to Window3."""
-        self.w3 = Window3(self)
-        self.windowFlag = 1
-        self.close()
-        self.w3.show()
 
     def download(self):
         self.timer.stop()
@@ -321,6 +199,7 @@ class Window2(QtWidgets.QMainWindow):
         else:
             self.timer.start()
 
+
 # THREAD FOR DATA LOGGING:
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
@@ -345,9 +224,6 @@ class DataLoggingThread(pg.QtCore.QThread):
 # -----------------------------------------------------------------------------------------------------------------------------------------
 app = QtWidgets.QApplication(sys.argv)
 
-# setup FES
-myFES = Rehamove_DKC("None")
-
 if ADC_ENABLED:
     # setup ADC
     i2c = busio.I2C(board.SCL, board.SDA)
@@ -358,7 +234,6 @@ if ADC_ENABLED:
 else:
     myADC = None
 
-w = Window2(myFES, myADC)
+w = Window1( myADC)
 w.show()
-myFES.close()
 sys.exit(app.exec_())

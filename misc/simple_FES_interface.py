@@ -1,4 +1,4 @@
-from DKC_rehamovelib import *          # Import our library
+from dkc_rehamovelib import *          # Import our library
 import time
 
 ## CHANGE COM PORT BASED OFF OF DEVICE MANAGER
