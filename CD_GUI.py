@@ -24,7 +24,7 @@ from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
 # INITIALIZE VARIABLES
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
-ADC_ENABLED = False
+ADC_ENABLED = True
 
 if ADC_ENABLED:
     import busio
@@ -71,7 +71,7 @@ class Window1(QDialog):
         myFES.port = "/dev/ttyUSB0"
         myFES.connect()
         myFES.initialize()
-        if not myFES.is_connected():
+        if myFES.is_connected():
             # self.connect_lbl.setText('Successful')
             # self.connect_lbl.setStyleSheet('color: Green')
             # time.sleep(1)
@@ -212,12 +212,6 @@ class Window2(QtWidgets.QMainWindow):
         self.graphWidget.setXRange(self.x[-1]-10, self.x[-1]+2.5)
         self.data_line1.setData(self.x, self.y)
 
-        # Add max value reached to plot
-        # if ADC_ENABLED:
-        # 	if (float(myADC.voltage) > self.max_value_reached):
-        # 		self.max_value_reached = (float(myADC.voltage))
-        # 		self.committedNp_lbl.display(self.max_value_reached)
-
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
         data_buffer = data_buffer[1:]
@@ -349,6 +343,7 @@ class Window3(QtWidgets.QMainWindow):
         self.y = [0] * SAMPLES
         self.x_storage = [0]
         self.y_storage = [0]
+        self.fes_pulse_sent_idx = 0
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
@@ -417,11 +412,16 @@ class Window3(QtWidgets.QMainWindow):
         # Detect if steady state reached
         if ADC_ENABLED:
             if not self.test_complete:
-                if temp_y > 0:
-                    if int(np.size(self.y_storage)) > 51:
-                        if not np.any(np.array(self.y_storage[-50:]) < 0):
-                            print('success')
-                            self.test_complete = True
+                if int(np.size(self.y_storage)) > 51:
+                    rollingVar = np.var(self.y_storage[-50:])
+                    rollingMean = np.mean(self.y_storage[-50:])
+                    if rollingVar < 1 and rollingMean > 1:
+                        print('success')
+                        self.test_complete = True
+                        self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'b', 'width': 1}, bounds =[0,100], pos = temp_x)
+                        self.graphWidget.addItem(self.target)
+                        self.fes_pulse_sent_idx = temp_x
+
 
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
@@ -487,10 +487,11 @@ class Window3(QtWidgets.QMainWindow):
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
             header3 = "FES F = " + str(self.committedF_lbl.value())
             header4 = "FES Np = " + str(self.committedNp_lbl.value())
-            header5 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s), Window Flag"
+            header5 = "FES Pulse Delivered at = " + str(self.fes_pulse_sent_idx)
+            header6 = "Thread Time (s), Thread Voltage (V), GUI Time (s), GUI Voltage (V), Inner Loop Time (s), Window Flag"
             #save data to file
             np.savetxt(filename, data_to_save, delimiter=',', fmt='%s', comments = '', 
-                header = '\n'.join([header1, header2, header3, header4, header5]))
+                header = '\n'.join([header1, header2, header3, header4, header5, header6]))
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
             msg.setText("Download completed successfully!")
@@ -522,7 +523,7 @@ class DataLoggingThread(pg.QtCore.QThread):
             time.sleep(THREAD_SPEED)
             if ADC_ENABLED:
                 x = float(time.time())
-                y = float(myADC.voltage)
+                y = float((myADC.voltage*-95.64) + 113.3) #multiply by 1.3558 for Nm
             else:
                 # do NOT plot data from here!
                 x = float(time.time())
