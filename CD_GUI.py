@@ -68,7 +68,7 @@ class Window1(QDialog):
         # myFES = Rehamove_DKC(str(self.comports[self.portSelect_cb.currentIndex()].device)); # Open USB port (on Windows) -- maybe will want a dropdown
         # self.w2.FES.write_pulse(2, [(150,  10), (50, 0), (150, -10)])
 # 		myFES.port = str(self.comports[self.portSelect_cb.currentIndex()].device)
-        myFES.port = "/dev/ttyUSB0"
+        myFES.port = "/dev/ttyUSB0" #specific to port
         myFES.connect()
         myFES.initialize()
         if myFES.is_connected():
