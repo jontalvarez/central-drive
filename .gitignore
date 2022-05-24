@@ -1,1 +1,17 @@
 **/desktop.ini
+*.ini
+data/desktop.ini
+desktop.ini
+dkc_rehamovelib/__pycache__/desktop.ini
+dkc_rehamovelib/desktop.ini
+misc/desktop.ini
+misc/dkc_rehamovelib/__pycache__/desktop.ini
+misc/dkc_rehamovelib/desktop.ini
+resources/desktop.ini
+rpi/desktop.ini
+rpi/dkc_rehamovelib/__pycache__/desktop.ini
+rpi/dkc_rehamovelib/desktop.ini
+windows/desktop.ini
+windows/dkc_rehamovelib/__pycache__/desktop.ini
+windows/dkc_rehamovelib/desktop.ini
+resources/desktop.ini
