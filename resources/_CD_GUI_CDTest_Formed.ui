@@ -14,7 +14,7 @@
    <string>Central Drive Estimation</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
+   <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0" colspan="3">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -24,7 +24,7 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0" rowspan="2">
+    <item row="1" column="0" rowspan="3">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_3">
@@ -36,7 +36,7 @@
          </font>
         </property>
         <property name="text">
-         <string>FES Controls</string>
+         <string>FES Parameters</string>
         </property>
         <property name="scaledContents">
          <bool>false</bool>
@@ -129,26 +129,53 @@
      </layout>
     </item>
     <item row="1" column="1">
-     <widget class="QCheckBox" name="target_cb">
-      <property name="text">
-       <string>Display Target</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
      <widget class="QPushButton" name="download_pb">
       <property name="text">
        <string>Download Data</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
+    <item row="1" column="2">
      <widget class="QPushButton" name="returnToMain_pb">
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
       <property name="text">
        <string>Return to Main</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1" colspan="2">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Max Torque Reached (ft-lbs)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLCDNumber" name="maxTorque_lcd"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="maxTorqueReset_pb">
+        <property name="text">
+         <string>Reset Value</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="1">
+     <widget class="QCheckBox" name="target_cb">
+      <property name="text">
+       <string>Display Target</string>
       </property>
      </widget>
     </item>

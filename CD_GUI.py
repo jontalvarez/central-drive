@@ -24,7 +24,7 @@ from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
 # INITIALIZE VARIABLES
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
-ADC_ENABLED = True
+ADC_ENABLED = False
 
 if ADC_ENABLED:
     import busio
@@ -71,7 +71,7 @@ class Window1(QDialog):
         myFES.port = "/dev/ttyUSB0" #specific to port
         myFES.connect()
         myFES.initialize()
-        if myFES.is_connected():
+        if not myFES.is_connected():
             # self.connect_lbl.setText('Successful')
             # self.connect_lbl.setStyleSheet('color: Green')
             # time.sleep(1)
@@ -98,23 +98,22 @@ class Window2(QtWidgets.QMainWindow):
         # Setup FES Channels and Parameters
         self.channel_cb.addItems(
             [' ', '1 (Red)', '2 (Blue)', '3 (Black)', '4 (White)'])
-        self.amp_sp.setRange(0, 50)  # FES amplitude (mA)
+        self.amp_sp.setRange(0, 150)  # FES amplitude (mA)
         self.amp_sp.setValue(15)
-        self.dur_sp.setRange(0, 500)  # FES duration (us)
+        self.dur_sp.setRange(0, 600)  # FES duration (us)
         self.dur_sp.setValue(150)
-        self.f_sp.setRange(0, 10)  # FES frequency (Hz)
+        self.f_sp.setRange(0, 100)  # FES frequency (Hz)
         self.f_sp.setValue(1)
-        self.np_sp.setRange(0, 100)  # FES number of pulses (int)
+        self.np_sp.setRange(0, 20)  # FES number of pulses (int)
         self.np_sp.setValue(1)
 
         # Connect push and check buttons
         # commit parameters to FES system
         self.commit_pb.clicked.connect(self.update_lcd)
-        self.target_cb.toggled.connect(
-            self.update_target)  # add target line to plot
+        self.target_cb.toggled.connect(self.update_target)  # add target line to plot
         self.download_pb.clicked.connect(self.download)  # download data
-        self.sendPulse_pb.clicked.connect(
-            self.try_fes)  # send a single FES burst
+        self.sendPulse_pb.clicked.connect(self.try_fes)  # send a single FES burst
+        self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)  # go to CD window
         self.CD_pb.clicked.connect(self.connect_to_Window3)  # go to CD window
 
         #### Initialize Variables ####
@@ -132,6 +131,10 @@ class Window2(QtWidgets.QMainWindow):
         self.x_storage = [0]
         self.y_storage = [0]
         self.pyqtTimerTime = [0]
+        
+        # Setup max torque lcd
+        self.max_torque_reached = 0.0
+        self.maxTorque_lcd.display(self.max_torque_reached)
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
@@ -212,11 +215,20 @@ class Window2(QtWidgets.QMainWindow):
         self.graphWidget.setXRange(self.x[-1]-10, self.x[-1]+2.5)
         self.data_line1.setData(self.x, self.y)
 
+        if temp_y > self.max_torque_reached:
+            self.max_torque_reached = temp_y
+            self.maxTorque_lcd.display(temp_y)
+
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
         data_buffer = data_buffer[1:]
         data_buffer.append(float(new_data))
         return data_buffer
+
+    def reset_torque_lcd(self):
+        """Reset max torque lcd to 0"""
+        self.max_torque_reached = 0.0
+        self.maxTorque_lcd.display(0.0)
 
     #### FES METHODS ####
     def try_fes(self):
@@ -322,20 +334,17 @@ class Window3(QtWidgets.QMainWindow):
         #### Setup GUI Widgets ####
         # Grab values commited to Hasomed Device from Window2
         self.channel_lbl.setText(self.w22.channel_cb.currentText())
-        self.committedAmp_lbl.display(
-            self.w22.committedAmp_lbl.value())  # FES amplitude (mA)
-        self.committedDur_lbl.display(
-            self.w22.committedDur_lbl.value())  # FES Duration (us)
-        self.committedF_lbl.display(
-            self.w22.committedF_lbl.value())  # FES frequency (Hz)
-        # FES number of pulses (int)
-        self.committedNp_lbl.display(self.w22.committedNp_lbl.value())
-
+        self.committedAmp_lbl.display(self.w22.committedAmp_lbl.value())  # FES amplitude (mA)
+        self.committedDur_lbl.display(self.w22.committedDur_lbl.value())  # FES Duration (us)
+        self.committedF_lbl.display(self.w22.committedF_lbl.value())  # FES frequency (Hz)
+        self.committedNp_lbl.display(self.w22.committedNp_lbl.value()) # FES number of pulses (int)
+        
         # Connect push buttons and spinners
         self.target_cb.toggled.connect(self.update_target)
         self.download_pb.clicked.connect(self.download)
         self.returnToMain_pb.clicked.connect(self.connect_to_main)
-
+        self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)
+        
         #### Setup PYQTGRAPH ####
         # Preassign data
         # self.x = list(range(SAMPLES))
@@ -344,6 +353,10 @@ class Window3(QtWidgets.QMainWindow):
         self.x_storage = [0]
         self.y_storage = [0]
         self.fes_pulse_sent_idx = 0
+
+        # Setup max torque lcd
+        self.max_torque_reached = 0.0
+        self.maxTorque_lcd.display(self.max_torque_reached)
 
         # Create a plot window
         self.graphWidget = pg.PlotWidget()
@@ -409,6 +422,10 @@ class Window3(QtWidgets.QMainWindow):
         self.graphWidget.setXRange(self.x[-1]-10, self.x[-1]+2.5)
         self.data_line1.setData(self.x, self.y)
 
+        if temp_y > self.max_torque_reached: #update max torque lcd if new max reached
+            self.max_torque_reached = temp_y
+            self.maxTorque_lcd.display(temp_y)
+
         # Detect if steady state reached
         if ADC_ENABLED:
             if not self.test_complete:
@@ -422,13 +439,17 @@ class Window3(QtWidgets.QMainWindow):
                         self.graphWidget.addItem(self.target)
                         self.fes_pulse_sent_idx = temp_x
 
-
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
         data_buffer = data_buffer[1:]
         data_buffer.append(float(new_data))
         return data_buffer
 
+    def reset_torque_lcd(self):
+        """Reset max torque lcd to 0"""
+        self.max_torque_reached = 0.0
+        self.maxTorque_lcd.display(0.0)
+        
     #### FES METHODS ####
     def try_fes(self):
         """If FES is enabled, update values and send a pulse."""

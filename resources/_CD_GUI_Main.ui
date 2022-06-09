@@ -173,8 +173,8 @@
    <widget class="QCheckBox" name="target_cb">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>510</y>
+      <x>470</x>
+      <y>550</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -187,7 +187,7 @@
     <property name="geometry">
      <rect>
       <x>790</x>
-      <y>440</y>
+      <y>420</y>
       <width>131</width>
       <height>61</height>
      </rect>
@@ -199,8 +199,8 @@
    <widget class="QCheckBox" name="fesEnable_cb">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>410</y>
+      <x>470</x>
+      <y>390</y>
       <width>111</width>
       <height>20</height>
      </rect>
@@ -213,7 +213,7 @@
     <property name="geometry">
      <rect>
       <x>470</x>
-      <y>440</y>
+      <y>420</y>
       <width>131</width>
       <height>61</height>
      </rect>
@@ -251,7 +251,7 @@
     <property name="geometry">
      <rect>
       <x>630</x>
-      <y>440</y>
+      <y>420</y>
       <width>131</width>
       <height>61</height>
      </rect>
@@ -262,6 +262,41 @@
     <property name="text">
      <string>Central Drive Test</string>
     </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>520</y>
+      <width>451</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_8">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Max Torque Reached (ft-lbs)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLCDNumber" name="maxTorque_lcd"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="maxTorqueReset_pb">
+       <property name="text">
+        <string>Reset Value</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
