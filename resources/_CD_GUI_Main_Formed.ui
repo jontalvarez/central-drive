@@ -14,18 +14,85 @@
    <string>Central Drive Estimation</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0" colspan="4">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QWidget" name="TorquePlot" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout"/>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="1" column="2" rowspan="3">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="4" column="2">
+       <widget class="QLCDNumber" name="committedDur_lbl"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Amplitude</string>
+        </property>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item row="1" column="0" rowspan="4">
-     <layout class="QGridLayout" name="gridLayout">
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Frequency</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="dur_sp"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Number of Pulses</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="channel_cb">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="currentText">
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QSpinBox" name="f_sp"/>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLCDNumber" name="committedAmp_lbl"/>
+      </item>
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="np_sp"/>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLCDNumber" name="committedNp_lbl"/>
+      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_3">
         <property name="font">
@@ -33,6 +100,7 @@
           <pointsize>15</pointsize>
           <weight>75</weight>
           <bold>true</bold>
+          <underline>true</underline>
          </font>
         </property>
         <property name="text">
@@ -46,52 +114,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QLCDNumber" name="committedAmp_lbl"/>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLCDNumber" name="committedDur_lbl"/>
-      </item>
-      <item row="5" column="1">
-       <widget class="QSpinBox" name="np_sp"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Amplitude</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="amp_sp"/>
-      </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Frequency</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="f_sp"/>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLCDNumber" name="committedF_lbl"/>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLCDNumber" name="committedNp_lbl"/>
-      </item>
-      <item row="3" column="0">
        <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
@@ -104,20 +127,18 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="dur_sp"/>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="commit_pb">
         <property name="text">
-         <string>Number of Pulses</string>
+         <string>Commit FES Params</string>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
         </property>
        </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLCDNumber" name="committedF_lbl"/>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_7">
@@ -131,99 +152,19 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="channel_cb">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
-        <property name="placeholderText">
-         <string/>
-        </property>
-       </widget>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="amp_sp"/>
       </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="commit_pb">
-        <property name="text">
-         <string>Commit FES Params</string>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
+      <item row="2" column="1" colspan="2">
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
      </layout>
     </item>
-    <item row="1" column="1">
-     <widget class="QCheckBox" name="fesEnable_cb">
-      <property name="text">
-       <string>Enable FES</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QPushButton" name="sendPulse_pb">
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Send FES Pulse</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="2">
-     <widget class="QPushButton" name="CD_pb">
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Central Drive Test</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QPushButton" name="download_pb">
-      <property name="text">
-       <string>Download Data</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1" colspan="3">
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <widget class="QLabel" name="label_8">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Max Torque Reached (ft-lbs)</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLCDNumber" name="maxTorque_lcd"/>
-      </item>
-      <item>
-       <widget class="QPushButton" name="maxTorqueReset_pb">
-        <property name="text">
-         <string>Reset Value</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="1">
-     <widget class="QCheckBox" name="target_cb">
-      <property name="text">
-       <string>Display Target</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
+    <item row="3" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="label_4">
@@ -236,6 +177,224 @@
        <widget class="QLineEdit" name="comport_le"/>
       </item>
      </layout>
+    </item>
+    <item row="1" column="3" rowspan="3">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="7" column="1">
+       <widget class="QLCDNumber" name="currentTorque_lcd">
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QPushButton" name="resetBaseline_pb">
+        <property name="text">
+         <string>Reset Baseline</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="CD_pb">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Central Drive Test</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QPushButton" name="maxTorqueReset_pb">
+        <property name="text">
+         <string>Reset Value</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Current Torque (ft-lbs)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="fesEnable_cb">
+        <property name="text">
+         <string>Enable FES</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLCDNumber" name="maxTorque_lcd"/>
+      </item>
+      <item row="5" column="0" colspan="3">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QPushButton" name="PDRamp_pb">
+        <property name="text">
+         <string>Pulse Duration Ramp</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="QLabel" name="label_11">
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Testing Windows</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Max Torque Reached (ft-lbs)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="3">
+       <widget class="QLabel" name="label_12">
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Additional Controls</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QCheckBox" name="target_cb">
+        <property name="text">
+         <string>Display Target</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="3">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2">
+       <widget class="QPushButton" name="download_pb">
+        <property name="text">
+         <string>Download Data</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QLabel" name="label_10">
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>FES Enable and Pulse</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="sendPulse_pb">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Send FES Pulse</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="4" rowspan="4">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>1</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="0" column="1" colspan="3">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QWidget" name="TorquePlot" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout"/>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="1">
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="4">
+     <spacer name="horizontalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>1</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>

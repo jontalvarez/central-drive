@@ -170,61 +170,6 @@
      </item>
     </layout>
    </widget>
-   <widget class="QCheckBox" name="target_cb">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>550</y>
-      <width>121</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Display Target</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="download_pb">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>420</y>
-      <width>131</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Download Data</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="fesEnable_cb">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>390</y>
-      <width>111</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Enable FES</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="sendPulse_pb">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>420</y>
-      <width>131</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>Send FES Pulse</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
@@ -247,33 +192,70 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="CD_pb">
+   <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>420</y>
-      <width>131</width>
-      <height>61</height>
+      <x>490</x>
+      <y>390</y>
+      <width>571</width>
+      <height>193</height>
      </rect>
     </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>Central Drive Test</string>
-    </property>
-   </widget>
-   <widget class="QWidget" name="horizontalLayoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>520</y>
-      <width>451</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QCheckBox" name="fesEnable_cb">
+       <property name="text">
+        <string>Enable FES</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QPushButton" name="maxTorqueReset_pb">
+       <property name="text">
+        <string>Reset Value</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="sendPulse_pb">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Send FES Pulse</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Current Torque (ft-lbs)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLCDNumber" name="maxTorque_lcd"/>
+     </item>
+     <item row="4" column="0">
       <widget class="QLabel" name="label_8">
        <property name="font">
         <font>
@@ -286,13 +268,51 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QLCDNumber" name="maxTorque_lcd"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="maxTorqueReset_pb">
+     <item row="5" column="0">
+      <widget class="QCheckBox" name="target_cb">
        <property name="text">
-        <string>Reset Value</string>
+        <string>Display Target</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLCDNumber" name="currentTorque_lcd">
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QPushButton" name="resetBaseline_pb">
+       <property name="text">
+        <string>Reset Baseline</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QPushButton" name="download_pb">
+       <property name="text">
+        <string>Download Data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="CD_pb">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Central Drive Test</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="PDRamp_pb">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Pulse Duration Ramp</string>
        </property>
       </widget>
      </item>
