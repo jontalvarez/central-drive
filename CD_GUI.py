@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 #PyQt Imports
-from PyQt5 import QtWidgets, QtCore, uic
+from PyQt5 import QtWidgets, QtCore, uic, QtTest
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -17,6 +17,7 @@ import numpy as np
 import itertools
 import serial.tools.list_ports
 from datetime import datetime
+from threading import Thread
 #FES Imports
 from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
 
@@ -64,17 +65,14 @@ class Window1(QDialog):
         self.w2 = Window2(myFES, myADC)
         self.w2.comport_le.setText(
             self.comports[self.portSelect_cb.currentIndex()].device)
-        # print(str(self.comports[self.portSelect_cb.currentIndex()].device))
         # myFES = Rehamove_DKC(str(self.comports[self.portSelect_cb.currentIndex()].device)); # Open USB port (on Windows) -- maybe will want a dropdown
-        # self.w2.FES.write_pulse(2, [(150,  10), (50, 0), (150, -10)])
-# 		myFES.port = str(self.comports[self.portSelect_cb.currentIndex()].device)
-        myFES.port = "/dev/ttyUSB0" #specific to port
+        # myFES.port = "COM6" #specific to port /dev/ttyUSB0
+        myFES.port = str(self.comports[self.portSelect_cb.currentIndex()].device)
         myFES.connect()
         myFES.initialize()
-        if not myFES.is_connected():
-            # self.connect_lbl.setText('Successful')
-            # self.connect_lbl.setStyleSheet('color: Green')
-            # time.sleep(1)
+        if myFES.is_connected():
+            self.connect_lbl.setText('Successful')
+            self.connect_lbl.setStyleSheet('color: Green')
             self.w2.show()
             self.close()
         else:
@@ -99,9 +97,9 @@ class Window2(QtWidgets.QMainWindow):
         self.channel_cb.addItems(
             [' ', '1 (Red)', '2 (Blue)', '3 (Black)', '4 (White)'])
         self.amp_sp.setRange(0, 150)  # FES amplitude (mA)
-        self.amp_sp.setValue(15)
+        self.amp_sp.setValue(30)
         self.dur_sp.setRange(0, 600)  # FES duration (us)
-        self.dur_sp.setValue(150)
+        self.dur_sp.setValue(500)
         self.f_sp.setRange(0, 100)  # FES frequency (Hz)
         self.f_sp.setValue(1)
         self.np_sp.setRange(0, 20)  # FES number of pulses (int)
@@ -112,7 +110,7 @@ class Window2(QtWidgets.QMainWindow):
         self.commit_pb.clicked.connect(self.update_lcd)
         self.target_cb.toggled.connect(self.update_target)  # add target line to plot
         self.download_pb.clicked.connect(self.download)  # download data
-        self.sendPulse_pb.clicked.connect(self.try_fes)  # send a single FES burst
+        self.sendPulse_pb.clicked.connect(self.update_and_send_pulse_fes)  # send a single FES burst
         self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)  # reset max Torque LCD
         # self.resetBaseline_pb.clicked.connect(self.reset_baseline)  # reset max Torque LCD
         self.CD_pb.clicked.connect(self.connect_to_Window3)  # go to CD window
@@ -229,7 +227,7 @@ class Window2(QtWidgets.QMainWindow):
 
         # Display Current Torque 
         self.currentTorque_lcd.display(np.round(temp_y, 1))
-        
+
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
         data_buffer = data_buffer[1:]
@@ -246,12 +244,12 @@ class Window2(QtWidgets.QMainWindow):
     #     self.baseline_offset = self.current_torque
 
     #### FES METHODS ####
-    def try_fes(self):
-        """If FES is enabled, update values and send a pulse."""
-        if self.fesEnable_cb.isChecked():
-            self.update_and_send_pulse_fes()
-        else:
-            pass
+    # def try_fes(self):
+    #     """If FES is enabled, update values and send a pulse."""
+    #     if self.fesEnable_cb.isChecked():
+    #         self.update_and_send_pulse_fes()
+    #     else:
+    #         pass
 
     def update_and_send_pulse_fes(self):
         """Update FES parameters and send pulse."""
@@ -259,27 +257,25 @@ class Window2(QtWidgets.QMainWindow):
         dur = int(self.committedDur_lbl.value())  # [us]
         f = int(self.committedF_lbl.value())  # hz
         n_pulse = int(self.committedNp_lbl.value())
-        try:
-            # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-            channelNum = int(self.channel_cb.currentText()[0])
-            self.send_pulse_fes(amp, dur, f, n_pulse, channelNum)
-        except:
-            print('No Channel Selected')
 
-    def send_pulse_fes(self, amp, dur, f, n_pulse, channelNum):
-        """Send pulse to FES."""
-        for i in range(0, n_pulse):
-            if f == 1:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomed Pulse Sent')
-            else:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomed Pulse Sent')
-                time.sleep(1.0/f)
+        if self.fesEnable_cb.isChecked():
+            try:
+                # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
+                channelNum = int(self.channel_cb.currentText()[0])
+                for i in range(0, n_pulse):
+                    myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
+                    print('Hasomed Pulse Sent')
+                    QtTest.QTest.qWait(1000*(1.0/f))
+            except:
+                print('Failed FES Pulse')
+
+    # def send_pulse_fes(self, amp, dur, f, n_pulse, channelNum):
+    #     """Send pulse to FES."""
+    #     for i in range(0, n_pulse):
+    #         # Send pulse every second
+    #         myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
+    #         print('Hasomed Pulse Sent')
+    #         QtTest.QTest.qWait(1000*(1.0/f))
 
     #### MISCELLANEOUS METHODS ####
     def connect_to_Window3(self):
@@ -292,7 +288,7 @@ class Window2(QtWidgets.QMainWindow):
     def connect_to_Window4(self):
         """Connect to Window3."""
         self.w4 = Window4(self)
-        self.windowFlag = 1
+        self.windowFlag = 2
         self.close()
         self.w4.show()
 
@@ -485,16 +481,12 @@ class Window3(QtWidgets.QMainWindow):
         if (time.time() - self.cd_test_timer) < 5:
             MFGA = self.mfga_sp.value()
             SSVAR = self.variance_sp.value()
-            # if self.target_cb.isChecked():
-            #     self.graphWidget.removeItem(self.target)
-            # self.cd_target = pg.InfiniteLine(movable=False, angle=0, pen={'color': 'b', 'width': 5}, bounds =[0,100], pos = perc*MFGA)
-            # self.graphWidget.addItem(self.cd_target)  
 
             #detect if steady state is reached
             rollingVar = np.var(self.y_storage[-50:])
             rollingMean = np.mean(self.y_storage[-50:])
             if rollingVar < SSVAR and rollingMean > 0.9*(perc*MFGA) and rollingMean < 1.1*(perc*MFGA):
-                print('Successful Trial')
+                self.update_and_send_pulse_fes()     
                 self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'g', 'width': 2.5}, bounds =[0,100], pos = temp_x)
                 self.graphWidget.addItem(self.target)
                 self.fes_pulse_sent_idx = temp_x
@@ -524,41 +516,23 @@ class Window3(QtWidgets.QMainWindow):
         self.maxTorque_lcd.display(0.0)
         
     #### FES METHODS ####
-    def try_fes(self):
-        """If FES is enabled, update values and send a pulse."""
-        if self.fesEnable_cb.isChecked():
-            self.update_and_send_pulse_fes()
-        else:
-            pass
-
     def update_and_send_pulse_fes(self):
         """Update FES parameters and send pulse."""
-        amp = int(self.committedAmp_lbl.value())  # [mA]
-        dur = int(self.committedDur_lbl.value())  # [us]
-        f = int(self.committedF_lbl.value())  # hz
-        n_pulse = int(self.committedNp_lbl.value())
+        amp = int(self.w22.committedAmp_lbl.value())  # [mA]
+        dur = int(self.w22.committedDur_lbl.value())  # [us]
+        f = int(self.w22.committedF_lbl.value())  # hz
+        n_pulse = int(self.w22.committedNp_lbl.value())
+        channelNum = int(self.w22.channel_cb.currentText()[0])
 
-        try:
-            # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-            channelNum = int(self.channel_cb.currentText()[0])
-            self.send_pulse_fes(amp, dur, f, n_pulse, channelNum)
-        except:
-            print('No Channel Selected')
-
-    def send_pulse_fes(self, amp, dur, f, n_pulse, channelNum):
-        """Send pulse to FES."""
-        for i in range(0, n_pulse):
-            if f == 1:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomed Pulse Sent')
-            else:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomedd Pulse Sent')
-                time.sleep(1.0/f)
+        if self.w22.fesEnable_cb.isChecked():
+            try:
+                # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
+                for i in range(0, n_pulse):
+                    myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
+                    print('Hasomed Pulse Sent')
+                    QtTest.QTest.qWait(1000*(1.0/f))
+            except:
+                print('Failed FES Pulse')
 
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
@@ -627,11 +601,16 @@ class Window4(QtWidgets.QMainWindow):
         #### Setup GUI Widgets ####
         # Grab values commited to Hasomed Device from Window2
         self.channel_lbl.setText(self.w22.channel_cb.currentText())
-        self.committedAmp_lbl.display(self.w22.committedAmp_lbl.value())  # FES amplitude (mA)
-        self.committedDur_lbl.display(self.w22.committedDur_lbl.value())  # FES Duration (us)
-        self.committedF_lbl.display(self.w22.committedF_lbl.value())  # FES frequency (Hz)
-        self.committedNp_lbl.display(self.w22.committedNp_lbl.value()) # FES number of pulses (int)
-        
+        self.committedAmp_lbl.display(150)  # FES amplitude (mA)
+        self.committedDur_lbl.display(50)  # FES Duration (us)
+        self.committedF_lbl.display(1)  # FES frequency (Hz)
+        self.committedNp_lbl.display(1) # FES number of pulses (int)
+
+        ##TO DO
+        self.currentChannel = int(self.w22.channel_cb.currentText()[0]) #CHANGE THIS TO BE A VISUAL INDICATOR
+        self.pulse_sent_flag =  True #change to be switched by button
+        ##
+
         # Connect push buttons and spinners
         self.target_cb.toggled.connect(self.update_target)
         self.download_pb.clicked.connect(self.download)
@@ -639,7 +618,8 @@ class Window4(QtWidgets.QMainWindow):
         self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)
         
         # Setup push button and bool for PD Ramp
-        self.beginTest_pb.clicked.connect(self.set_pd_ramp_start_bool)
+        # self.beginTest_pb.clicked.connect(self.set_pd_ramp_start_bool)
+        self.beginTest_pb.clicked.connect(self.pd_ramp)
         self.pd_ramp_start_bool = False
         self.pd_ramp_end_bool = True
 
@@ -735,19 +715,87 @@ class Window4(QtWidgets.QMainWindow):
                 self.pd_ramp_end_bool = False
             self.pulse_duration_ramp()
 
-    def pulse_duration_ramp(self):
-        time_elapsed_since_start = (time.time() - self.pd_ramp_timer)
-        if time_elapsed_since_start > 3 and time_elapsed_since_start < 6:
-            self.pdramp_progbar.setValue(20)
-            #define function to send pulse
-        if time_elapsed_since_start > 6:
-            self.pdramp_progbar.setValue(40)
-            #define function to send pulse
-        if time_elapsed_since_start > 9:
-            self.pdramp_progbar.setValue(0)
-            self.pd_ramp_start_bool = False
-            self.pd_ramp_end_bool = True
-            self.beginTest_pb.setStyleSheet("")
+    # def pd_ramp_calling_func(self):
+    #     for k, dur in enumerate(range(50, 650, 50)):
+    #         self.pd_ramp(dur)
+    #         self.pdramp_progbar.setValue(100*(k/12))
+    #     self.pdramp_progbar.setValue(0)
+    #     self.beginTest_pb.setStyleSheet("")
+
+    # def pd_ramp(self, dur):
+    #     """Send pulse to FES."""
+    #     self.beginTest_pb.setStyleSheet("border: 2px black; border-radius: 5px; padding: 5.5px; background: green")
+    #     amp = 150
+    #     channelNum = self.currentChannel
+    #     # for k, dur in enumerate(range(50, 650, 50)):
+    #     print(dur)
+    #     # Send pulse every second
+    #     myFES.write_pulse(channelNum, [(dur, amp), (50, 0), (dur, -amp)])
+    #     print('Hasomed Pulse Sent')
+    #     QTimer.singleShot(3000, lambda: self.pd_ramp_calling_func)
+        
+
+    def pd_ramp(self):
+        """Send pulse to FES."""
+        self.beginTest_pb.setStyleSheet("border: 2px black; border-radius: 5px; padding: 5.5px; background: green")
+        amp = 30
+        channelNum = self.currentChannel
+        for k, dur in enumerate(range(50, 650, 50)):
+            print(dur)
+            # Send pulse every second
+            self.send_single_pulse_fes(channelNum, amp, dur)
+            self.committedDur_lbl.display(dur)  # FES Duration (us)
+            self.pdramp_progbar.setValue(100*(k/11))
+            print('Hasomed Pulse Sent')
+            QtTest.QTest.qWait(1000)
+        self.pdramp_progbar.setValue(0)
+        self.beginTest_pb.setStyleSheet("")
+
+    # def pulse_duration_ramp(self):
+    #     time_elapsed_since_start = (time.time() - self.pd_ramp_timer)
+    #     """Need to figure out how to get this to only send one pulse."""
+    #     if 3 < time_elapsed_since_start < 6 and self.pulse_sent_flag:
+    #         self.send_single_pulse_fes(150, 50, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(1/12))
+    #         self.pulse_sent_flag = False
+    #     if 6 < time_elapsed_since_start < 9:
+    #         self.send_single_pulse_fes(150, 100, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(2/12))
+    #     if 9 < time_elapsed_since_start < 12:
+    #         self.send_single_pulse_fes(150, 150, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(3/12))       
+    #     if 12 < time_elapsed_since_start < 15:
+    #         self.send_single_pulse_fes(150, 200, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(4/12))       
+    #     if 15 < time_elapsed_since_start < 18:
+    #         self.send_single_pulse_fes(150, 250, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(5/12))       
+    #     if 18 < time_elapsed_since_start < 21:
+    #         self.send_single_pulse_fes(150, 300, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(6/12))
+    #     if 21 < time_elapsed_since_start < 24:
+    #         self.send_single_pulse_fes(150, 350, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(7/12))
+    #     if 24 < time_elapsed_since_start < 27:
+    #         self.send_single_pulse_fes(150, 400, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(8/12))
+    #     if 27 < time_elapsed_since_start < 30:
+    #         self.send_single_pulse_fes(150, 450, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(9/12))
+    #     if 30 < time_elapsed_since_start < 33:
+    #         self.send_single_pulse_fes(150, 500, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(10/12))
+    #     if 33 < time_elapsed_since_start < 36:
+    #         self.send_single_pulse_fes(150, 550, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(11/12))
+    #     if 36 < time_elapsed_since_start < 39:
+    #         self.send_single_pulse_fes(150, 600, self.currentChannel)
+    #         self.pdramp_progbar.setValue(100*(12/12))
+    #     if time_elapsed_since_start > 42:
+    #         self.pdramp_progbar.setValue(0)
+    #         self.pd_ramp_start_bool = False
+    #         self.pd_ramp_end_bool = True
+    #         self.beginTest_pb.setStyleSheet("")
 
     def set_pd_ramp_start_bool(self):
         self.pd_ramp_start_bool = True
@@ -764,41 +812,11 @@ class Window4(QtWidgets.QMainWindow):
         self.maxTorque_lcd.display(0.0)
         
     #### FES METHODS ####
-    def try_fes(self):
-        """If FES is enabled, update values and send a pulse."""
-        if self.fesEnable_cb.isChecked():
-            self.update_and_send_pulse_fes()
-        else:
-            pass
-
-    def update_and_send_pulse_fes(self):
-        """Update FES parameters and send pulse."""
-        amp = int(self.committedAmp_lbl.value())  # [mA]
-        dur = int(self.committedDur_lbl.value())  # [us]
-        f = int(self.committedF_lbl.value())  # hz
-        n_pulse = int(self.committedNp_lbl.value())
-
-        try:
-            # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-            channelNum = int(self.channel_cb.currentText()[0])
-            self.send_pulse_fes(amp, dur, f, n_pulse, channelNum)
-        except:
-            print('No Channel Selected')
-
-    def send_pulse_fes(self, amp, dur, f, n_pulse, channelNum):
-        """Send pulse to FES."""
-        for i in range(0, n_pulse):
-            if f == 1:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomed Pulse Sent')
-            else:
-                # Send pulse every second
-                myFES.write_pulse(
-                    channelNum, [(dur, amp), (50, 0), (dur, -amp)])
-                print('Hasomedd Pulse Sent')
-                time.sleep(1.0/f)
+    def send_single_pulse_fes(self, channelNum, amp, dur):
+        """Send single pulse to FES."""
+        if self.w22.fesEnable_cb.isChecked(): 
+            myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
+            print('Hasomed Pulse Sent')
 
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
@@ -862,6 +880,7 @@ class DataLoggingThread(pg.QtCore.QThread):
                 x = float(time.time())
                 y = float(np.sin(x) + 0.1*np.random.random())
             self.newData.emit([x, y])
+
 
 # SETUP:
 # -----------------------------------------------------------------------------------------------------------------------------------------
