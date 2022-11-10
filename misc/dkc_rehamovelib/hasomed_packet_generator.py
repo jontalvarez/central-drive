@@ -110,4 +110,3 @@ def generate_packet(pkt_num, command_num, active, channel, point_list):
 
 
 # print(example_packet == combined_test_pkt)
-

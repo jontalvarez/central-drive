@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
-    <height>234</height>
+    <width>609</width>
+    <height>278</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,27 +16,62 @@
   <widget class="QPushButton" name="startPlotting_pb">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>120</y>
-     <width>93</width>
-     <height>28</height>
+     <x>0</x>
+     <y>200</y>
+     <width>591</width>
+     <height>41</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="text">
     <string>Start Plotting</string>
    </property>
   </widget>
-  <widget class="QWidget" name="horizontalLayoutWidget">
+  <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>160</width>
-     <height>80</height>
+     <x>0</x>
+     <y>7</y>
+     <width>591</width>
+     <height>189</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="1">
+     <widget class="QComboBox" name="portSelect_cb">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentText">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Select FES Port</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
      <widget class="QLabel" name="label_2">
       <property name="font">
        <font>
@@ -48,7 +83,31 @@
       </property>
      </widget>
     </item>
-    <item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Participant ID</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Date</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
      <widget class="QLabel" name="connect_lbl">
       <property name="font">
        <font>
@@ -60,33 +119,60 @@
       </property>
      </widget>
     </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QLabel" name="label">
+    <item row="3" column="1">
+     <widget class="QDateEdit" name="date_de">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="font">
        <font>
         <pointsize>11</pointsize>
        </font>
       </property>
-      <property name="text">
-       <string>Select FES Port</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
+      <property name="minimumDate">
+       <date>
+        <year>2022</year>
+        <month>11</month>
+        <day>1</day>
+       </date>
       </property>
      </widget>
     </item>
-    <item>
-     <widget class="QComboBox" name="portSelect_cb">
-      <property name="currentText">
-       <string/>
+    <item row="2" column="1">
+     <widget class="QTextEdit" name="identifier_lbl">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="placeholderText">
+       <string>Ex. MM01 or FES01</string>
       </property>
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QCheckBox" name="ignoreFES_cb">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>250</y>
+     <width>171</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ignore FES Connection</string>
+   </property>
   </widget>
  </widget>
  <resources/>

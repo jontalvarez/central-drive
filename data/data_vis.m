@@ -1,11 +1,19 @@
-a = CD20220406163812(100:end, :);
+a = readtable('CD_Test_20221101__PDRamp.csv');
+data = table2array(a);
+
+%%
+time = data(1:end,1);
+torque = rescale(data(1:end,2));
+fes = rescale(data(1:end,3));
+window = rescale(data(1:end,4));
+
 figure(); 
-c = linspecer(3);
 hold on; 
-plot(a(:,1), a(:,2), 'color', c(1,:));
-scatter(a(:,1), a(:,2), 250, '.', 'MarkerFaceColor', c(1,:), 'MarkerEdgeColor', c(1,:))
-plot(a(:,3), a(:,4), 'color', c(2,:)); 
-plot(a(:,3), a(:,4), 'r.'); 
-plot(a(:,1), a(:,6)+1, 'color', c(3,:))
-legend('Thread Voltage', '', 'GUI Voltage', '', 'Window Flag')
-ylim([1.246, 1.25])
+plot(time, torque)
+plot(time, fes)
+plot(time, window)
+
+legend('Torque', 'FES', 'Window Flag')
+
+%%
+[a,b] = findpeaks(fes)

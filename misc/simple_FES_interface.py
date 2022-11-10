@@ -2,15 +2,19 @@ from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
 import time
 
 ## CHANGE COM PORT BASED OFF OF DEVICE MANAGER
-COM_PORT = "COM6"
+COM_PORT = "COM7"
 r = Rehamove_DKC(COM_PORT)            # Open USB port (on Windows)
+# s = Stimulator(COM_PORT)
+
+# s.build_CFT_pulse
+# s.hasomed_uppdate
 
 ##MODIFY THESE PARAMETERS## %test with 10 mA, 500 us, 1 Hz, 2 pulses on forearm to check if it works
-amp = 100 #mA
-dur = 500 #us
-f = 0.5 #Hz
-n_pulse = 100 #15 normally
-channelNum = 1 # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
+amp = 150 #mA
+dur = 600 #us
+f = 100 #Hz
+n_pulse = 15 #15 normally
+channelNum = 2 # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
 ####
 
 r.connect()
