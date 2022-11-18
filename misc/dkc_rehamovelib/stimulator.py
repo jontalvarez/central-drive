@@ -93,8 +93,6 @@ class Stimulator(QObject):
             self.update_channel_config(i)
         return 0
 
-
-
     def channel_update(self, channel_idx,t_ms):
         vft_flag = False
         time_start = time.time()
