@@ -44,7 +44,7 @@ def compute_channel_bit(active, channel_number, num_pts):
 
 def compute_point(dur, amp):
     compute_curr = lambda curr: 2*curr + 300
-    bin_dur = dur << 20
+    bin_dur = int(dur) << 20
     bin_amp = compute_curr(amp) << 10
 
     return (bin_dur | bin_amp).to_bytes(4,'big')
@@ -110,4 +110,3 @@ def generate_packet(pkt_num, command_num, active, channel, point_list):
 
 
 # print(example_packet == combined_test_pkt)
-
