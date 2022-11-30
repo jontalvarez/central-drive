@@ -51,7 +51,7 @@ os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 class ConnectWindow(QDialog):
     def __init__(self, myFES, myADC, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        uic.loadUi('resources/_CD_GUI_Landing_Formed.ui', self)
+        uic.loadUi('resources/_CD_GUI_Landing_Formed_Clinician.ui', self)
 
         # find existing COM Ports
         self.comports = serial.tools.list_ports.comports(include_links=True)
@@ -70,18 +70,29 @@ class ConnectWindow(QDialog):
             myFES.port = str(self.comports[self.portSelect_cb.currentIndex()].device)
             myFES.connect()
             myFES.initialize()
-        if myFES.is_connected() and self.identifier_lbl.toPlainText() or self.ignoreFES_cb.isChecked():
+        if myFES.is_connected() and self.identifier_lbl.toPlainText() and (self.pSide_cb.isChecked() or self.npSide_cb.isChecked()) or self.ignoreFES_cb.isChecked():
             self.connect_lbl.setText('Successful')
             self.connect_lbl.setStyleSheet('color: Green')
-            self.mw = MainWindow(myFES, myADC)
+            self.mw = DebugWindow(myFES, myADC)
             self.mw.comport_lbl.setText(self.comports[self.portSelect_cb.currentIndex()].device)
             self.mw.participantID_lbl.setText(self.identifier_lbl.toPlainText())
+            if self.pSide_cb.isChecked():
+                self.mw.testingSide_lbl.setText('P')
+            if self.npSide_cb.isChecked():
+                self.mw.testingSide_lbl.setText('NP')
             self.mw.currentDate = self.date_de.date().toPyDate()
+            if self.ignoreFES_cb.isChecked():
+                self.mw.comport_lbl.setText('No Port Connected')
+                self.mw.participantID_lbl.setText('MXXX')
+                self.mw.testingSide_lbl.setText('None')
             self.mw.show()
             self.close()
         elif not self.identifier_lbl.toPlainText():
             self.identifier_lbl.setPlaceholderText('Please add Participant ID!')
             self.identifier_lbl.setStyleSheet('color: red')
+        elif not (self.pSide_cb.isChecked() or self.npSide_cb.isChecked()):
+            self.connect_lbl.setText('Please choose a testing side!')
+            self.connect_lbl.setStyleSheet('color: red')
         else:  
             self.connect_lbl.setText('Unsuccessful Connection: Try Different Port')
             self.connect_lbl.setStyleSheet('color: red')
@@ -92,10 +103,10 @@ class ConnectWindow(QDialog):
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # https://www.youtube.com/watch?v=XXPNpdaK9WA
-class MainWindow(QtWidgets.QMainWindow):
+class DebugWindow(QtWidgets.QMainWindow):
     def __init__(self, myFES, myADC, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
-        uic.loadUi('resources/_CD_GUI_Main_Researcher_Formed.ui',
+        super(DebugWindow, self).__init__(*args, **kwargs)
+        uic.loadUi('resources/_CD_GUI_Main_Clinician_Formed.ui',
                    self)  # load ui from Qt Designer
 
         #### Setup Quitting Callback ####
@@ -122,9 +133,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.download_pb.clicked.connect(self.download)  # download data
         self.sendPulse_pb.clicked.connect(self.process_fes_request)  # send a single FES burst
         self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)  # reset max Torque LCD
-        self.CD_pb.clicked.connect(self.connect_to_CDWindow)  # go to CD window
-        self.PDRamp_pb.clicked.connect(self.connect_to_RampWindow)  # go to PD Ramp window
-        self.ActivationMVC_pb.clicked.connect(self.connect_to_ActivationWindow)  # go to Activation MVC window
+        self.beginTesting_pb.clicked.connect(self.connect_to_ActivationWindow)  # go to Activation MVC window
 
         #### Initialize Variables ####
         self.time_start = time.time()
@@ -277,51 +286,26 @@ class MainWindow(QtWidgets.QMainWindow):
             # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
             channelNum = int(self.channel_cb.currentText()[0])
             myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
-            self.mw_pulse_sent_idx.append(len(self.threadX))
+            self.mw_pulse_sent_idx.append(len(self.threadX)) #store FES idx for Main Window
         except:
             self.error_dialog.showMessage('Stimulation not delivered, double check connection to Hasomed')
 
 
-    #### MISCELLANEOUS METHODS ####
-    def connect_to_CDWindow(self):
-        """Connect to CDWindow."""
-        if not self.fesEnable_cb.isChecked():
-            self.error_dialog.showMessage("Error: Stimulation is not enabled! ")
-        elif not self.channel_cb.currentText():
-            self.error_dialog.showMessage("Error: No stimulation channel selected! ")            
-        elif not self.commited_pb_pressed_bool:
-            self.error_dialog.showMessage("Error: No stimulation parameters committed! ")   
-        else:
-            self.w3 = CDWindow(self)
-            self.windowFlag = 3
-            self.close()
-            self.w3.show()
-
-    def connect_to_RampWindow(self):
-        """Connect to PD Ramp Window."""
-        if not self.fesEnable_cb.isChecked():
-            self.error_dialog.showMessage("Error: Stimulation is not enabled!")
-        elif not self.channel_cb.currentText():
-            self.error_dialog.showMessage("Error: No stimulation channel selected!")            
-        elif not self.commited_pb_pressed_bool:
-            self.error_dialog.showMessage("Error: No stimulation parameters committed!")   
-        else:
-            self.w4 = RampWindow(self)
-            self.windowFlag = 2
-            self.close()
-            self.w4.show()
-            
+    #### MISCELLANEOUS METHODS ####          
     def connect_to_ActivationWindow(self):
         """Connect to Activation MVC Window."""
-        self.w5 = ActivationWindow(self)
-        self.windowFlag = 1
-        self.close()
-        self.w5.show()
+        if not self.channel_cb.currentText():
+            self.error_dialog.showMessage("Error: No stimulation channel selected!") 
+        else:           
+            self.w5 = ActivationWindow(self)
+            self.windowFlag = 1
+            self.close()
+            self.w5.show()
 
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/' + 'CD_Test_' + str(self.currentDate.strftime("%Y%m%d")) + '_' + self.participantID_lbl.text() + '_MainWindow'
+        default_filename = 'data/' + 'Central_Drive_' + self.participantID_lbl.text() + '_' + str(self.currentDate.strftime("%Y%m%d")) + '_DebugWindow'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
@@ -375,24 +359,26 @@ class MainWindow(QtWidgets.QMainWindow):
 class CDWindow(QtWidgets.QMainWindow):
     def __init__(self, mw, *args, **kwargs):
         super(CDWindow, self).__init__(*args, **kwargs)
-        uic.loadUi('resources/_CD_GUI_CDTest_Researcher_Formed.ui',
+        uic.loadUi('resources/_CD_GUI_CDTest_Formed_Clinician.ui',
                    self)  # load ui from Qt Designer
 
         #### Initialize Variables ####
-        self.mw2 = mw
+        self.mw2 = mw.mw2
         self.test_complete = False
         self.time_start = time.time()
         self.pyqtTimerTime = [0]
         self.window_time_start_idx = len(self.mw2.threadX) #index of first point in threadX so export everything after this for just this Window
+        self.successful_test_counter = 0
 
         #### Setup GUI Widgets ####
-        # Grab values commited to Hasomed Device from MainWindow
+        # Grab values commited to Hasomed Device from DebugWindow
         self.channel_lbl.setText(self.mw2.channel_cb.currentText())
-        self.committedAmp_lbl.display(self.mw2.committedAmp_lbl.value())  # FES amplitude (mA)
-        self.committedDur_lbl.display(self.mw2.committedDur_lbl.value())  # FES Duration (us)
-        self.committedF_lbl.display(self.mw2.committedF_lbl.value())  # FES frequency (Hz)
-        self.committedNp_lbl.display(self.mw2.committedNp_lbl.value()) # FES number of pulses (int)
-        
+        self.committedAmp_lbl.display(150)  # FES amplitude (mA)
+        self.committedDur_lbl.display(550)  # FES Duration (us)
+        self.committedF_lbl.display(100)  # FES frequency (Hz)
+        self.committedNp_lbl.display(15) # FES number of pulses (int)
+        self.successfulTestCounter_lcd.display(self.successful_test_counter)
+
         #Setup Auto CD Parameters
         try:
             self.mfga_sp.setValue(self.mw2.activation_MVC * 0.6)
@@ -406,7 +392,6 @@ class CDWindow(QtWidgets.QMainWindow):
         self.download_pb.clicked.connect(self.download)
         self.returnToMain_pb.clicked.connect(self.download)
         self.returnToMain_pb.clicked.connect(self.connect_to_main)
-        # self.returnToMain_pb.setStyleSheet("background-color : Green")
         self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)
         self.beginTest_pb.setCheckable(True)
         # Timer Bool for Run_CD_Test
@@ -526,9 +511,12 @@ class CDWindow(QtWidgets.QMainWindow):
                 self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'g', 'width': 2.5}, bounds =[0,100], pos = temp_x)
                 self.graphWidget.addItem(self.target)
                 self.reset_cd_checkboxes()
+                self.successful_test_counter += 1 #increment sucessful test counter and display
+                self.successfulTestCounter_lcd.display(self.successful_test_counter)
+
         else: 
             self.reset_cd_checkboxes()
-            self.error_dialog.showMessage('Unsuccessful Trial (Try Increasing Variance)')
+            self.error_dialog.showMessage('Unsuccessful Trial (Try Decreasing MFGA or Increasing Variance)')
 
     def reset_cd_checkboxes(self):
         """Reset checkboxes and timer for central drive testing."""
@@ -553,35 +541,16 @@ class CDWindow(QtWidgets.QMainWindow):
         myFES.set_amp(int(self.committedAmp_lbl.value())) #setter functions
         myFES.set_dur(int(self.committedDur_lbl.value()))
         myFES.set_freq(int(self.committedF_lbl.value()))
-        myFES.build_CD_pulse()
-        myFES.write_pulse(channelNum, myFES.message_CD)
-        myFES.write_pulse(channelNum, myFES.message_CD)
-        myFES.write_pulse(channelNum, myFES.message_CD)
-        myFES.write_pulse(channelNum, myFES.message_CD)
-        myFES.write_pulse(channelNum, myFES.message_CD)
 
-    def process_fes_request1(self):
-        """Update FES parameters and send pulse."""
-        amp = int(self.committedAmp_lbl.value())  # [mA]
-        dur = int(self.committedDur_lbl.value())  # [us]
-        f = int(self.committedF_lbl.value())  # [Hz]
-        n_pulse = int(self.committedNp_lbl.value())
+        myFES.build_CD_pulse() #calls method within Stimulator class which has 3 pulses 
+        self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX)) #store in case download from Main Window
+        self.fes_pulse_sent_idx.append(len(self.mw2.threadX)) #store index when FES pulse sent
 
-        if self.mw2.fesEnable_cb.isChecked():
-            for i in range(0, n_pulse):
-                QTimer.singleShot(1000* i * (1.0/f - (dur*(10**-6))), self.send_fes_pulse) #instantiate n_pulse times each with timeout equal to frequency delay
-
-    def send_fes_pulse(self):
-        amp = int(self.committedAmp_lbl.value())  # [mA]
-        dur = int(self.committedDur_lbl.value())  # [us]
-        try:
-            # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-            channelNum = int(self.mw2.channel_cb.currentText()[0])
-            myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
-            self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX))
-            self.fes_pulse_sent_idx.append(len(self.mw2.threadX)) #store index when FES pulse sent
-        except:
-            self.error_dialog.showMessage('Stimulation not delivered, double check connection to Hasomed')
+        myFES.write_pulse(channelNum, myFES.message_CD)
+        myFES.write_pulse(channelNum, myFES.message_CD)
+        myFES.write_pulse(channelNum, myFES.message_CD)
+        myFES.write_pulse(channelNum, myFES.message_CD)
+        myFES.write_pulse(channelNum, myFES.message_CD)
 
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
@@ -593,7 +562,7 @@ class CDWindow(QtWidgets.QMainWindow):
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/' + 'CD_Test_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_' + self.mw2.participantID_lbl.text() + '_CDWindow'
+        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_CDTest'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
@@ -648,18 +617,18 @@ class CDWindow(QtWidgets.QMainWindow):
 class RampWindow(QtWidgets.QMainWindow):
     def __init__(self, mw, *args, **kwargs):
         super(RampWindow, self).__init__(*args, **kwargs)
-        uic.loadUi('resources/_CD_GUI_PDRamp_Researcher_Formed.ui',
+        uic.loadUi('resources/_CD_GUI_PDRamp_Formed_Clinician.ui',
                    self)  # load ui from Qt Designer
 
         #### Initialize Variables ####
-        self.mw2 = mw
+        self.mw2 = mw.mw2 #Activation Window was last Main Window open so need to pass in its inherited classes from MW2
         self.test_complete = False
         self.time_start = time.time()
         self.pyqtTimerTime = [0]
         self.window_time_start_idx = len(self.mw2.threadX) #index of first point in threadX so export everything after this for just this Window
 
         #### Setup GUI Widgets ####
-        # Grab values commited to Hasomed Device from MainWindow
+        # Grab values commited to Hasomed Device from DebugWindow
         self.channel_lbl.setText(self.mw2.channel_cb.currentText())
         self.committedAmp_lbl.display(150)  # FES amplitude (mA)
         self.committedDur_lbl.display(50)  # FES Duration (us)
@@ -676,13 +645,13 @@ class RampWindow(QtWidgets.QMainWindow):
         self.download_pb.clicked.connect(self.download)
         self.returnToMain_pb.clicked.connect(self.download)
         self.returnToMain_pb.clicked.connect(self.connect_to_main)
+        self.nextCDTest_pb.clicked.connect(self.download)
+        self.nextCDTest_pb.clicked.connect(self.connect_to_CDTest)
         self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)
         
         # Setup push button and bool for PD Ramp
-        # self.beginTest_pb.clicked.connect(self.set_pd_ramp_start_bool)
-        self.beginTest_pb.clicked.connect(self.pd_ramp)
-        self.pd_ramp_start_bool = False
-        self.pd_ramp_end_bool = True
+        self.beginTest_pb.setCheckable(True)
+        self.pd_ramp_finished = 1
 
         #### Setup PYQTGRAPH ####
         # Preassign data
@@ -768,31 +737,10 @@ class RampWindow(QtWidgets.QMainWindow):
         # Display Current Torque 
         self.currentTorque_lcd.display(np.round(temp_y, 1))
 
-        # Begin Pulse Duration Ramp
-        if self.pd_ramp_start_bool:
-            self.beginTest_pb.setStyleSheet("border: 2px black; border-radius: 5px; padding: 5.5px; background: green")
-            if self.pd_ramp_end_bool:
-                self.pd_ramp_timer = time.time()
-                self.pd_ramp_end_bool = False
-            self.pulse_duration_ramp()        
-
-    def pd_ramp(self):
-        """Send pulse to FES."""
-        self.beginTest_pb.setStyleSheet("border: 2px black; border-radius: 5px; padding: 5.5px; background: green")
-        amp = 30
-        channelNum = self.currentChannel
-        for k, dur in enumerate(range(50, 650, 50)):
-            # Send pulse every second
-            self.send_single_pulse_fes(channelNum, amp, dur)
-            self.committedDur_lbl.display(dur)  # FES Duration (us)
-            self.pdramp_progbar.setValue(100*(k/11))
-            print('Hasomed Pulse Sent')
-            QtTest.QTest.qWait(1000)
-        self.pdramp_progbar.setValue(0)
-        self.beginTest_pb.setStyleSheet("")
-
-    def set_pd_ramp_start_bool(self):
-        self.pd_ramp_start_bool = True
+        # Run PD Ramp 
+        if self.beginTest_pb.isChecked() and self.pd_ramp_finished == 1:
+            self.pd_ramp_finished = 0
+            self.pd_ramp()
 
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
@@ -804,14 +752,43 @@ class RampWindow(QtWidgets.QMainWindow):
         """Reset max torque lcd to 0"""
         self.max_torque_reached = 0.0
         self.maxTorque_lcd.display(0.0)
-        
-    #### FES METHODS ####
-    def send_single_pulse_fes(self, channelNum, amp, dur):
-        """Send single pulse to FES."""
-        if self.mw2.fesEnable_cb.isChecked(): 
-            myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
-            self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX))
+
+    #### PD RAMP METHODS ####
+    def pd_ramp(self):
+        """Send single pulse every 3 seconds for duration ramping from 50-600 us in 50us increments."""
+        if self.beginTest_pb.isChecked():
+            # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(150, 150, 150)")
+            QTimer.singleShot(0 * 100, lambda: self.send_pd_ramp_pulse(100*(1/12), 50)) 
+            QTimer.singleShot(3 * 100, lambda: self.send_pd_ramp_pulse(100*(2/12), 100)) 
+            QTimer.singleShot(6 * 100, lambda: self.send_pd_ramp_pulse(100*(3/12), 150)) 
+            QTimer.singleShot(9 * 100, lambda: self.send_pd_ramp_pulse(100*(4/12), 200)) 
+            QTimer.singleShot(12 * 100, lambda: self.send_pd_ramp_pulse(100*(5/12), 250)) 
+            QTimer.singleShot(15 * 100, lambda: self.send_pd_ramp_pulse(100*(6/12), 300)) 
+            QTimer.singleShot(18 * 100, lambda: self.send_pd_ramp_pulse(100*(7/12), 350)) 
+            QTimer.singleShot(21 * 100, lambda: self.send_pd_ramp_pulse(100*(8/12), 400)) 
+            QTimer.singleShot(24 * 100, lambda: self.send_pd_ramp_pulse(100*(9/12), 450))
+            QTimer.singleShot(27 * 100, lambda: self.send_pd_ramp_pulse(100*(10/12), 500))
+            QTimer.singleShot(30 * 100, lambda: self.send_pd_ramp_pulse(100*(11/12), 550))
+            QTimer.singleShot(33 * 100, lambda: self.send_pd_ramp_pulse(100*(12/12), 600))
+
+    def send_pd_ramp_pulse(self, pbar, dur):
+        self.pdramp_progbar.setValue(pbar)
+        amp = int(self.committedAmp_lbl.value())  # [mA]
+        channelNum = int(self.mw2.channel_cb.currentText()[0])
+        try:
+            # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
+            self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'g', 'width': 2.5}, bounds =[0,150], pos = self.mw2.threadX[-1])
+            self.graphWidget.addItem(self.target)
+            myFES.write_pulse(channelNum, [(int((dur)/2), amp), (int((dur)/2), -amp)])  
+            self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX)) #store in case download from Main Window
             self.fes_pulse_sent_idx.append(len(self.mw2.threadX)) #store index when FES pulse sent
+        except:
+            self.error_dialog.showMessage('Stimulation not delivered, double check connection to Hasomed')
+        if pbar == 100:
+            self.pdramp_progbar.setValue(0)
+            self.beginTest_pb.toggle()
+            self.pd_ramp_finished = 1
+            # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(0, 170, 255)")
 
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
@@ -820,10 +797,17 @@ class RampWindow(QtWidgets.QMainWindow):
         self.mw2.show()
         self.close()
 
+    def connect_to_CDTest(self):
+        """Connect to main GUI."""
+        self.w3 = CDWindow(self)
+        self.windowFlag = 3
+        self.close()
+        self.w3.show()
+
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/' + 'CD_Test_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_' + self.mw2.participantID_lbl.text() + '_PDRamp'
+        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_PDRamp'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
@@ -875,7 +859,7 @@ class RampWindow(QtWidgets.QMainWindow):
 class ActivationWindow(QtWidgets.QMainWindow):
     def __init__(self, mw, *args, **kwargs):
         super(ActivationWindow, self).__init__(*args, **kwargs)
-        uic.loadUi('resources/_CD_GUI_ActivationMVC_Formed.ui',
+        uic.loadUi('resources/_CD_GUI_ActivationMVC_Formed_Clinician.ui',
                    self)  # load ui from Qt Designer
 
         #### Initialize Variables ####
@@ -890,6 +874,8 @@ class ActivationWindow(QtWidgets.QMainWindow):
         self.download_pb.clicked.connect(self.download)
         self.returnToMain_pb.clicked.connect(self.download)
         self.returnToMain_pb.clicked.connect(self.connect_to_main)
+        self.nextPDRamp_pb.clicked.connect(self.download)
+        self.nextPDRamp_pb.clicked.connect(self.connect_to_PDRamp)
         self.maxTorqueReset_pb.clicked.connect(self.reset_torque_lcd)
 
         #### Setup PYQTGRAPH ####
@@ -994,10 +980,18 @@ class ActivationWindow(QtWidgets.QMainWindow):
         self.mw2.show()
         self.close()
 
+    def connect_to_PDRamp(self):
+        """Connect to main GUI."""
+        self.mw2.activation_MVC = max(self.mw2.threadY[self.window_time_start_idx:])
+        self.mw2.windowFlag = 2
+        self.w4 = RampWindow(self)
+        self.close()
+        self.w4.show()
+
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/CD_' + datetime.now().strftime("%Y%m%d-%H%M%S")
+        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_ActivationMVC'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
