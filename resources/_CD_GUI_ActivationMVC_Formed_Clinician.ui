@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1090</width>
-    <height>591</height>
+    <width>1144</width>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -78,7 +78,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Instructions: Please conduct one maximum voluntary plantarflexion contraction, making sure to isolate the plantarflexors as much as possible throughout the contraction. Hold for several seconds.</string>
+         <string>Instructions: Please conduct one maximum voluntary plantarflexion contraction, making sure to isolate the plantarflexors as much as possible throughout the contraction. Hold for several seconds and then relax.</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
@@ -202,6 +202,12 @@ color: rgb(255, 255, 255);</string>
       </item>
       <item row="2" column="0" colspan="5">
        <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -214,7 +220,7 @@ color: rgb(255, 255, 255);</string>
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>The activation MVC is a standard maximum voluntary contraction. </string>
+         <string>The activation maximum voluntary contraction (MVC) helps pre-condition the muscle for electrical stimulation. Additionally, the torque value reached will be used as an initial input value for the central drive testing.</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
@@ -244,7 +250,7 @@ color: rgb(255, 255, 255);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1090</width>
+     <width>1144</width>
      <height>26</height>
     </rect>
    </property>

@@ -374,7 +374,7 @@ class CDWindow(QtWidgets.QMainWindow):
         # Grab values commited to Hasomed Device from DebugWindow
         self.channel_lbl.setText(self.mw2.channel_cb.currentText())
         self.committedAmp_lbl.display(150)  # FES amplitude (mA)
-        self.committedDur_lbl.display(550)  # FES Duration (us)
+        self.committedDur_lbl.display(self.mw2.chosenDuration)  # FES Duration (us)
         self.committedF_lbl.display(100)  # FES frequency (Hz)
         self.committedNp_lbl.display(15) # FES number of pulses (int)
         self.successfulTestCounter_lcd.display(self.successful_test_counter)
@@ -757,38 +757,44 @@ class RampWindow(QtWidgets.QMainWindow):
     def pd_ramp(self):
         """Send single pulse every 3 seconds for duration ramping from 50-600 us in 50us increments."""
         if self.beginTest_pb.isChecked():
-            # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(150, 150, 150)")
-            QTimer.singleShot(0 * 100, lambda: self.send_pd_ramp_pulse(100*(1/12), 50)) 
-            QTimer.singleShot(3 * 100, lambda: self.send_pd_ramp_pulse(100*(2/12), 100)) 
-            QTimer.singleShot(6 * 100, lambda: self.send_pd_ramp_pulse(100*(3/12), 150)) 
-            QTimer.singleShot(9 * 100, lambda: self.send_pd_ramp_pulse(100*(4/12), 200)) 
-            QTimer.singleShot(12 * 100, lambda: self.send_pd_ramp_pulse(100*(5/12), 250)) 
-            QTimer.singleShot(15 * 100, lambda: self.send_pd_ramp_pulse(100*(6/12), 300)) 
-            QTimer.singleShot(18 * 100, lambda: self.send_pd_ramp_pulse(100*(7/12), 350)) 
-            QTimer.singleShot(21 * 100, lambda: self.send_pd_ramp_pulse(100*(8/12), 400)) 
-            QTimer.singleShot(24 * 100, lambda: self.send_pd_ramp_pulse(100*(9/12), 450))
-            QTimer.singleShot(27 * 100, lambda: self.send_pd_ramp_pulse(100*(10/12), 500))
-            QTimer.singleShot(30 * 100, lambda: self.send_pd_ramp_pulse(100*(11/12), 550))
-            QTimer.singleShot(33 * 100, lambda: self.send_pd_ramp_pulse(100*(12/12), 600))
+            for i, dur in enumerate(range(50, 650, 50)):
+                QTimer.singleShot(i * 1000, self.outer(100*((i+1)/12), dur)) 
+        #     # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(150, 150, 150)")
+        #     QTimer.singleShot(0 * 100, lambda: self.send_pd_ramp_pulse(100*(1/12), 50)) 
+        #     QTimer.singleShot(3 * 100, lambda: self.send_pd_ramp_pulse(100*(2/12), 100)) 
+        #     QTimer.singleShot(6 * 100, lambda: self.send_pd_ramp_pulse(100*(3/12), 150)) 
+        #     QTimer.singleShot(9 * 100, lambda: self.send_pd_ramp_pulse(100*(4/12), 200)) 
+        #     QTimer.singleShot(12 * 100, lambda: self.send_pd_ramp_pulse(100*(5/12), 250)) 
+        #     QTimer.singleShot(15 * 100, lambda: self.send_pd_ramp_pulse(100*(6/12), 300)) 
+        #     QTimer.singleShot(18 * 100, lambda: self.send_pd_ramp_pulse(100*(7/12), 350)) 
+        #     QTimer.singleShot(21 * 100, lambda: self.send_pd_ramp_pulse(100*(8/12), 400)) 
+        #     QTimer.singleShot(24 * 100, lambda: self.send_pd_ramp_pulse(100*(9/12), 450))
+        #     QTimer.singleShot(27 * 100, lambda: self.send_pd_ramp_pulse(100*(10/12), 500))
+        #     QTimer.singleShot(30 * 100, lambda: self.send_pd_ramp_pulse(100*(11/12), 550))
+        #     QTimer.singleShot(33 * 100, lambda: self.send_pd_ramp_pulse(100*(12/12), 600))
 
-    def send_pd_ramp_pulse(self, pbar, dur):
-        self.pdramp_progbar.setValue(pbar)
-        amp = int(self.committedAmp_lbl.value())  # [mA]
-        channelNum = int(self.mw2.channel_cb.currentText()[0])
-        try:
-            # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-            self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'g', 'width': 2.5}, bounds =[0,150], pos = self.mw2.threadX[-1])
-            self.graphWidget.addItem(self.target)
-            myFES.write_pulse(channelNum, [(int((dur)/2), amp), (int((dur)/2), -amp)])  
-            self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX)) #store in case download from Main Window
-            self.fes_pulse_sent_idx.append(len(self.mw2.threadX)) #store index when FES pulse sent
-        except:
-            self.error_dialog.showMessage('Stimulation not delivered, double check connection to Hasomed')
-        if pbar == 100:
-            self.pdramp_progbar.setValue(0)
-            self.beginTest_pb.toggle()
-            self.pd_ramp_finished = 1
-            # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(0, 170, 255)")
+    def outer(self, pbar, dur):
+        """Wrapper function, this is something Philipp helped me with, and it just allows me to call a function in QTimer.singleShot()"""
+        def send_pd_ramp_pulse():
+            """Function called when QTimer.singleShot() from pd_ramp times out, which sends an individual pulse with specific pulse duration and progress bar percentage"""
+            self.pdramp_progbar.setValue(pbar)
+            amp = int(self.committedAmp_lbl.value())  # [mA]
+            channelNum = int(self.mw2.channel_cb.currentText()[0])
+            try:
+                # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
+                self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'g', 'width': 2.5}, bounds =[0,150], pos = self.mw2.threadX[-1])
+                self.graphWidget.addItem(self.target)
+                myFES.write_pulse(channelNum, [(int((dur)/2), amp), (int((dur)/2), -amp)])  
+                self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX)) #store in case download from Main Window
+                self.fes_pulse_sent_idx.append(len(self.mw2.threadX)) #store index when FES pulse sent
+            except:
+                self.error_dialog.showMessage('Stimulation not delivered, double check connection to Hasomed')
+            if pbar == 100:
+                self.pdramp_progbar.setValue(0)
+                self.beginTest_pb.toggle()
+                self.pd_ramp_finished = 1
+                # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(0, 170, 255)")
+        return send_pd_ramp_pulse
 
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
@@ -799,10 +805,14 @@ class RampWindow(QtWidgets.QMainWindow):
 
     def connect_to_CDTest(self):
         """Connect to main GUI."""
-        self.w3 = CDWindow(self)
-        self.windowFlag = 3
+        # self.w3 = CDWindow(self)
+        # self.windowFlag = 3
+        # self.close()
+        # self.w3.show()
+        self.w25 = Ramp_Visualization(self)
+        self.windowFlag = 2.5
         self.close()
-        self.w3.show()
+        self.w25.show()
 
     def download(self):
         self.timer.stop()
@@ -819,6 +829,12 @@ class RampWindow(QtWidgets.QMainWindow):
             fes_temp[self.fes_pulse_sent_idx] = 1
             fes_ = fes_temp[self.window_time_start_idx:]
             data_to_save = list(itertools.zip_longest(time_, torque_ , fes_, window_))
+
+            #save data for visualization
+            self.mw2.rampfes = fes_ * np.max(torque_)
+            self.mw2.ramptor = torque_
+            self.mw2.ramptime = time_
+
             #create headers for file
             header1 = "FES Amp = " + str(self.committedAmp_lbl.value())
             header2 = "FES Dur = " + str(self.committedDur_lbl.value())
@@ -1024,6 +1040,73 @@ class ActivationWindow(QtWidgets.QMainWindow):
         """Handle key press event."""
         if event.key() == Qt.Key_Escape:
             self.close()
+
+
+# Plotting PD Ramp Data:
+# -----------------------------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------------------------
+class Ramp_Visualization(QtWidgets.QMainWindow):
+    def __init__(self, mw, *args, **kwargs):
+        super(Ramp_Visualization, self).__init__(*args, **kwargs)
+        uic.loadUi('resources/_CD_GUI_PDRamp_Visualization_Formed_Clinician.ui',
+                   self)  # load ui from Qt Designer
+
+        #### Initialize Variables ####
+        self.mw2 = mw.mw2
+
+        #### Setup GUI Widgets ####
+        # Connect push buttons and spinners
+        self.returnToMain_pb.clicked.connect(self.connect_to_main)
+        self.nextCDTest_pb.clicked.connect(self.connect_to_CDTest)
+
+        #### Setup PYQTGRAPH ####
+        # Create a plot window
+        self.graphWidget = pg.PlotWidget()
+        self.findChild(QWidget, "TorquePlot").layout().addWidget(self.graphWidget)
+        self.graphWidget.setBackground('w')
+        self.graphWidget.setTitle("Pulse Duration Ramp")
+        self.graphWidget.setLabel('left', 'Torque (ft-lbs)')
+        self.graphWidget.setLabel('bottom', 'Samples')
+        self.graphWidget.showGrid(x=False, y=True)
+        self.graphWidget.enableAutoRange(axis = 'y')
+        self.graphWidget.setAutoVisible(y = True)
+        self.graphWidget.addLegend()
+
+        # Prepare scrolling line
+        pen1 = pg.mkPen(color=([228, 26, 28]), width=2.5)
+        pen2 = pg.mkPen(color=([26, 228, 28]), width=2.5)
+        self.graphWidget.plot(self.mw2.ramptime, self.mw2.rampfes, pen=pen2, name="FES")
+        self.graphWidget.plot(self.mw2.ramptime, self.mw2.ramptor, pen=pen1, name="Torque Sensor")
+
+    #### MISCELLANEOUS METHODS ####
+    def connect_to_main(self):
+        """Connect to main GUI."""
+        self.mw2.activation_MVC = max(self.mw2.threadY[self.window_time_start_idx:])
+        self.mw2.windowFlag = 0
+        self.mw2.show()
+        self.close()
+
+    def connect_to_CDTest(self):
+        """Connect to main GUI."""
+        self.mw2.chosenDuration = self.desiredDuration_sp.value()
+        self.w3 = CDWindow(self)
+        self.windowFlag = 3
+        self.close()
+        self.w3.show()
+
+    def pause_plotting(self):
+        """Pause plotting by stopping the bacgkround timer."""
+        if self.pause_tb.isChecked():
+            self.timer.stop()
+        else:
+            self.timer.start()
+
+    def key_press_event(self, event):
+        """Handle key press event."""
+        if event.key() == Qt.Key_Escape:
+            self.close()
+
 
 # THREAD FOR DATA LOGGING:
 # -----------------------------------------------------------------------------------------------------------------------------------------

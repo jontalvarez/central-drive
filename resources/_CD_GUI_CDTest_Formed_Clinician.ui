@@ -73,7 +73,7 @@
            </font>
           </property>
           <property name="text">
-           <string>MFGA (ft-lbs)</string>
+           <string>Percentage of MFGA (ft-lbs)</string>
           </property>
          </widget>
         </item>
@@ -516,7 +516,10 @@ color: rgb(255, 255, 255);</string>
            <string notr="true"/>
           </property>
           <property name="text">
-           <string>The central drive test will consist of 15 pulses at 100 Hz, 150 mA, and duration based on the pulse duration ramp. </string>
+           <string>The central drive test assesses the ratio between voluntary activation and maximum force generating ability of a muscle. Each stimulation burst will consist of 15 pulses at 100 Hz, 150 mA, and duration based on the pulse duration ramp. </string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -556,7 +559,10 @@ color: rgb(255, 255, 255);</string>
            </font>
           </property>
           <property name="text">
-           <string>The participant is going to need to be still and reach x, y, z</string>
+           <string>Instructions: Once the &quot;Begin Test&quot; button is pressed the participant should aim to maximally plantarflex (as was done during the activation MVC) and hold at their maximum. There will be a 10s period after the &quot;Begin Test&quot; button is pressed for a successful test, otherwise please have the participant relax and adjust the parameters as needed. A burst will be delivered (successful test) only if two conditions are met: (1) the torque is above the Percentage of MFGA listed, and (2) the steady state variance is below the listed value for more than 0.25s. Please adjust as needed.</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
