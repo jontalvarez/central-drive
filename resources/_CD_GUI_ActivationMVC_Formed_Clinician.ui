@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1144</width>
-    <height>606</height>
+    <width>1224</width>
+    <height>832</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,11 @@
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="9" column="0">
        <widget class="QCheckBox" name="target_cb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Display Target</string>
         </property>
@@ -41,6 +46,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="smallDecimalPoint">
          <bool>false</bool>
         </property>
@@ -53,6 +63,7 @@
        <widget class="QLabel" name="label_8">
         <property name="font">
          <font>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -73,7 +84,7 @@
        <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <italic>true</italic>
          </font>
         </property>
@@ -87,6 +98,11 @@
       </item>
       <item row="9" column="2">
        <widget class="QPushButton" name="download_pb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Download Data</string>
         </property>
@@ -103,6 +119,7 @@
        <widget class="QLabel" name="label_7">
         <property name="font">
          <font>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -122,6 +139,7 @@
         </property>
         <property name="font">
          <font>
+          <pointsize>18</pointsize>
           <weight>50</weight>
           <bold>false</bold>
           <underline>false</underline>
@@ -141,7 +159,7 @@
        <widget class="QLabel" name="label_10">
         <property name="font">
          <font>
-          <pointsize>15</pointsize>
+          <pointsize>20</pointsize>
           <weight>75</weight>
           <bold>true</bold>
           <underline>true</underline>
@@ -159,7 +177,7 @@
        <widget class="QPushButton" name="nextPDRamp_pb">
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -175,6 +193,11 @@ color: rgb(255, 255, 255);</string>
       </item>
       <item row="7" column="4">
        <widget class="QPushButton" name="maxTorqueReset_pb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Reset Value</string>
         </property>
@@ -182,6 +205,11 @@ color: rgb(255, 255, 255);</string>
       </item>
       <item row="11" column="0">
        <widget class="QPushButton" name="returnToMain_pb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
@@ -210,7 +238,7 @@ color: rgb(255, 255, 255);</string>
         </property>
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <italic>true</italic>
           <bold>true</bold>
@@ -250,8 +278,8 @@ color: rgb(255, 255, 255);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1144</width>
-     <height>26</height>
+     <width>1224</width>
+     <height>37</height>
     </rect>
    </property>
   </widget>

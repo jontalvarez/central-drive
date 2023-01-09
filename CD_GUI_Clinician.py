@@ -20,12 +20,12 @@ from datetime import datetime
 from threading import Thread
 #FES Imports
 from dkc_rehamovelib.DKC_rehamovelib import *  # Import our library
-
+from pprint import pprint
 
 # INITIALIZE VARIABLES
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
-ADC_ENABLED = False
+ADC_ENABLED = True
 
 if ADC_ENABLED:
     import busio
@@ -56,7 +56,7 @@ class ConnectWindow(QDialog):
         # find existing COM Ports
         self.comports = serial.tools.list_ports.comports(include_links=True)
         for comport in self.comports:
-            self.portSelect_cb.addItem(comport.description)
+            self.portSelect_cb.addItem(comport.device)
         self.startPlotting_pb.clicked.connect(self.connect_to_main)
 
     def key_press_event(self, e):
@@ -112,7 +112,7 @@ class DebugWindow(QtWidgets.QMainWindow):
         #### Setup Quitting Callback ####
         self.app = QtWidgets.QApplication.instance()
         self.app.aboutToQuit.connect(self.about_to_quit)
-
+        self.showMaximized()
         #### Setup GUI Widgets ####
         # Setup FES Channels and Parameters
         self.channel_cb.addItems(['', '1 (Red)', '2 (Blue)', '3 (Black)', '4 (White)'])
@@ -288,7 +288,7 @@ class DebugWindow(QtWidgets.QMainWindow):
             myFES.write_pulse(channelNum, [(int((dur)/2),amp), (int((dur)/2), -amp)])  
             self.mw_pulse_sent_idx.append(len(self.threadX)) #store FES idx for Main Window
         except:
-            self.error_dialog.showMessage('Stimulation not delivered, double check connection to Hasomed')
+            self.error_dialog.showMessage('Stimulation not delivered, double check (1) channel is selected, and (2) that electrodes are connected.')
 
 
     #### MISCELLANEOUS METHODS ####          
@@ -339,6 +339,7 @@ class DebugWindow(QtWidgets.QMainWindow):
         print('Exiting Application')
         self.thread.terminate()
         self.timer.stop()
+        sys.exit()
         QCoreApplication.quit()
 
     def pause_plotting(self):
@@ -364,6 +365,7 @@ class CDWindow(QtWidgets.QMainWindow):
 
         #### Initialize Variables ####
         self.mw2 = mw.mw2
+        self.showMaximized()
         self.test_complete = False
         self.time_start = time.time()
         self.pyqtTimerTime = [0]
@@ -381,7 +383,7 @@ class CDWindow(QtWidgets.QMainWindow):
 
         #Setup Auto CD Parameters
         try:
-            self.mfga_sp.setValue(self.mw2.activation_MVC * 0.6)
+            self.mfga_sp.setValue(self.mw2.activation_MVC * 0.8)
             self.variance_sp.setValue(0.1)
         except:
             self.mfga_sp.setValue(0)
@@ -487,6 +489,7 @@ class CDWindow(QtWidgets.QMainWindow):
         # Run Central Drive Test 
         #100% MVC
         if self.beginTest_pb.isChecked():
+            self.beginTest_pb.setStyleSheet("background-color: yellow")
             if self.cd_test_timeout: #can likely optimize in the future with 
                 self.cd_test_timer = time.time()
                 self.cd_test_timeout = 0
@@ -498,7 +501,7 @@ class CDWindow(QtWidgets.QMainWindow):
             SSVAR = self.variance_sp.value()
 
             #find which indices correspond to x ms back
-            window_size = 1 #[s]
+            window_size = 0.25 #[s]
             current_idx_subset = np.array(self.x_storage[-1]) - np.array(self.x_storage[-1000:]) #take subset we know is definitely within x ms
             correct_idx = np.argmax(current_idx_subset[::-1] > window_size) #idx matching window size (but not correct relative to actual position in x_storage)
 
@@ -507,22 +510,27 @@ class CDWindow(QtWidgets.QMainWindow):
             rollingMean = np.mean(self.y_storage[-correct_idx - 1:]) #look back at last "window_size" seconds as window
             
             if rollingVar < SSVAR and rollingMean > MFGA: #and rollingMean < 1.1*(perc*MFGA):
-                self.process_fes_request()     
-                self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'g', 'width': 2.5}, bounds =[0,100], pos = temp_x)
-                self.graphWidget.addItem(self.target)
+                self.process_fes_request()
+                try:
+                    self.graphWidget.removeItem(self.marker)
+                except:
+                    pass
+                self.marker = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'black', 'width': 2.5}, bounds =[0,100], pos = self.mw2.threadX[-1])
+                self.graphWidget.addItem(self.marker)
                 self.reset_cd_checkboxes()
                 self.successful_test_counter += 1 #increment sucessful test counter and display
                 self.successfulTestCounter_lcd.display(self.successful_test_counter)
+                self.beginTest_pb.setStyleSheet("background-color: rgb(0, 170, 255)")
 
         else: 
             self.reset_cd_checkboxes()
+            self.beginTest_pb.setStyleSheet("background-color: rgb(0, 170, 255)")
             self.error_dialog.showMessage('Unsuccessful Trial (Try Decreasing MFGA or Increasing Variance)')
 
     def reset_cd_checkboxes(self):
         """Reset checkboxes and timer for central drive testing."""
         self.beginTest_pb.toggle() 
         self.cd_test_timeout = 1
-        # self.graphWidget.removeItem(self.cd_target)
 
     def add_data(self, data_buffer, new_data):
         """Store new data in buffer."""
@@ -626,6 +634,7 @@ class RampWindow(QtWidgets.QMainWindow):
         self.time_start = time.time()
         self.pyqtTimerTime = [0]
         self.window_time_start_idx = len(self.mw2.threadX) #index of first point in threadX so export everything after this for just this Window
+        self.showMaximized()
 
         #### Setup GUI Widgets ####
         # Grab values commited to Hasomed Device from DebugWindow
@@ -757,6 +766,7 @@ class RampWindow(QtWidgets.QMainWindow):
     def pd_ramp(self):
         """Send single pulse every 3 seconds for duration ramping from 50-600 us in 50us increments."""
         if self.beginTest_pb.isChecked():
+            self.beginTest_pb.setStyleSheet("background-color: yellow")
             for i, dur in enumerate(range(50, 650, 50)):
                 QTimer.singleShot(i * 1000, self.outer(100*((i+1)/12), dur)) 
         #     # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(150, 150, 150)")
@@ -782,7 +792,7 @@ class RampWindow(QtWidgets.QMainWindow):
             channelNum = int(self.mw2.channel_cb.currentText()[0])
             try:
                 # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-                self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'g', 'width': 2.5}, bounds =[0,150], pos = self.mw2.threadX[-1])
+                self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'black', 'width': 2.5}, bounds =[0,150], pos = self.mw2.threadX[-1])
                 self.graphWidget.addItem(self.target)
                 myFES.write_pulse(channelNum, [(int((dur)/2), amp), (int((dur)/2), -amp)])  
                 self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX)) #store in case download from Main Window
@@ -793,7 +803,7 @@ class RampWindow(QtWidgets.QMainWindow):
                 self.pdramp_progbar.setValue(0)
                 self.beginTest_pb.toggle()
                 self.pd_ramp_finished = 1
-                # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(0, 170, 255)")
+                self.beginTest_pb.setStyleSheet("background-color: rgb(0, 170, 255)")
         return send_pd_ramp_pulse
 
     #### MISCELLANEOUS METHODS ####
@@ -865,7 +875,7 @@ class RampWindow(QtWidgets.QMainWindow):
         if event.key() == Qt.Key_Escape:
             self.close()
 
-# PD RAMP WINDOW:
+# ACTIVATION MVC WINDOW:
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------------
@@ -880,6 +890,7 @@ class ActivationWindow(QtWidgets.QMainWindow):
 
         #### Initialize Variables ####
         self.mw2 = mw
+        self.showMaximized()
         self.time_start = time.time()
         self.pyqtTimerTime = [0]
         self.window_time_start_idx = len(self.mw2.threadX) #index of first point in threadX so export everything after this for just this Window
@@ -1075,9 +1086,12 @@ class Ramp_Visualization(QtWidgets.QMainWindow):
 
         # Prepare scrolling line
         pen1 = pg.mkPen(color=([228, 26, 28]), width=2.5)
-        pen2 = pg.mkPen(color=([26, 228, 28]), width=2.5)
-        self.graphWidget.plot(self.mw2.ramptime, self.mw2.rampfes, pen=pen2, name="FES")
-        self.graphWidget.plot(self.mw2.ramptime, self.mw2.ramptor, pen=pen1, name="Torque Sensor")
+        pen2 = pg.mkPen(color=([0,0,0]), width=2.5)
+        try:
+            self.graphWidget.plot(self.mw2.ramptime, self.mw2.rampfes, pen=pen2, name="FES")
+            self.graphWidget.plot(self.mw2.ramptime, self.mw2.ramptor, pen=pen1, name="Torque Sensor")
+        except:
+            pass
 
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
@@ -1119,7 +1133,7 @@ class DataLoggingThread(pg.QtCore.QThread):
             time.sleep(THREAD_SPEED)
             if ADC_ENABLED:
                 x = float(time.time())
-                y = float((myADC.voltage*-95.64) + 113.3) #multiply by 1.3558 for Nm
+                y = float((myADC.voltage*-95.64) + 113.3 + 2) #multiply by 1.3558 for Nm
             else:
                 # do NOT plot data from here!
                 x = float(time.time())

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>609</width>
-    <height>278</height>
+    <width>931</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,6 +24,11 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>18</pointsize>
+        </font>
+       </property>
        <property name="currentText">
         <string/>
        </property>
@@ -33,7 +38,7 @@
       <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="text">
@@ -45,7 +50,7 @@
       <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="text">
@@ -63,7 +68,7 @@
        </property>
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="dateTime">
@@ -89,7 +94,7 @@
       <widget class="QLabel" name="label_3">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="text">
@@ -101,7 +106,7 @@
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="text">
@@ -116,7 +121,7 @@
       <widget class="QLabel" name="label_4">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="text">
@@ -128,7 +133,7 @@
       <widget class="QLabel" name="connect_lbl">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="text">
@@ -146,7 +151,7 @@
        </property>
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>18</pointsize>
         </font>
        </property>
        <property name="placeholderText">
@@ -160,7 +165,7 @@
         <widget class="QCheckBox" name="pSide_cb">
          <property name="font">
           <font>
-           <pointsize>11</pointsize>
+           <pointsize>18</pointsize>
           </font>
          </property>
          <property name="text">
@@ -172,7 +177,7 @@
         <widget class="QCheckBox" name="npSide_cb">
          <property name="font">
           <font>
-           <pointsize>11</pointsize>
+           <pointsize>18</pointsize>
           </font>
          </property>
          <property name="text">
@@ -188,7 +193,7 @@
     <widget class="QPushButton" name="startPlotting_pb">
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <pointsize>18</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -203,6 +208,11 @@
    </item>
    <item row="2" column="0">
     <widget class="QCheckBox" name="ignoreFES_cb">
+     <property name="font">
+      <font>
+       <pointsize>18</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string>Ignore FES Connection</string>
      </property>

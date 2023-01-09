@@ -30,7 +30,7 @@
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
-          <pointsize>15</pointsize>
+          <pointsize>20</pointsize>
           <weight>75</weight>
           <bold>true</bold>
           <underline>true</underline>
@@ -45,7 +45,7 @@
        <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <italic>true</italic>
          </font>
         </property>
@@ -59,6 +59,11 @@
       </item>
       <item row="2" column="1">
        <widget class="QSpinBox" name="desiredDuration_sp">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="minimum">
          <number>50</number>
         </property>
@@ -77,6 +82,7 @@
        <widget class="QLabel" name="label_3">
         <property name="font">
          <font>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -88,6 +94,11 @@
       </item>
       <item row="3" column="0">
        <widget class="QPushButton" name="returnToMain_pb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(195, 195, 195);</string>
         </property>
@@ -100,7 +111,7 @@
        <widget class="QPushButton" name="nextCDTest_pb">
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -124,7 +135,7 @@ background-color: rgb(0, 170, 0);</string>
      <x>0</x>
      <y>0</y>
      <width>1180</width>
-     <height>26</height>
+     <height>37</height>
     </rect>
    </property>
   </widget>

@@ -25,6 +25,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
         <property name="segmentStyle">
          <enum>QLCDNumber::Flat</enum>
         </property>
@@ -34,6 +39,7 @@
        <widget class="QLabel" name="label_7">
         <property name="font">
          <font>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -45,6 +51,11 @@
       </item>
       <item row="7" column="2">
        <widget class="QPushButton" name="download_pb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Download Data</string>
         </property>
@@ -58,6 +69,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Reset Value</string>
         </property>
@@ -65,6 +81,11 @@
       </item>
       <item row="7" column="0">
        <widget class="QCheckBox" name="target_cb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Display Target</string>
         </property>
@@ -81,6 +102,7 @@
        <widget class="QLabel" name="label_8">
         <property name="font">
          <font>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -98,6 +120,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="value">
          <number>0</number>
         </property>
@@ -113,7 +140,7 @@
         </property>
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -135,6 +162,11 @@ background-color: rgb(0, 170, 0);</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+         </font>
+        </property>
         <property name="segmentStyle">
          <enum>QLCDNumber::Flat</enum>
         </property>
@@ -151,7 +183,7 @@ background-color: rgb(0, 170, 0);</string>
        <widget class="QPushButton" name="beginTest_pb">
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -190,7 +222,7 @@ background-color: rgb(0, 170, 255);</string>
        <widget class="QLabel" name="label_10">
         <property name="font">
          <font>
-          <pointsize>15</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
           <underline>true</underline>
@@ -222,7 +254,7 @@ background-color: rgb(0, 170, 255);</string>
        <widget class="QLabel" name="label_6">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <pointsize>15</pointsize>
          </font>
         </property>
         <property name="text">
@@ -234,7 +266,7 @@ background-color: rgb(0, 170, 255);</string>
        <widget class="QLabel" name="label_5">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <pointsize>15</pointsize>
          </font>
         </property>
         <property name="text">
@@ -249,7 +281,7 @@ background-color: rgb(0, 170, 255);</string>
        <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <pointsize>15</pointsize>
           <italic>false</italic>
          </font>
         </property>
@@ -260,6 +292,11 @@ background-color: rgb(0, 170, 255);</string>
       </item>
       <item row="7" column="0" colspan="2">
        <widget class="QPushButton" name="returnToMain_pb">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
@@ -275,7 +312,7 @@ background-color: rgb(0, 170, 255);</string>
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <pointsize>15</pointsize>
          </font>
         </property>
         <property name="text">
@@ -287,7 +324,7 @@ background-color: rgb(0, 170, 255);</string>
        <widget class="QLabel" name="label_3">
         <property name="font">
          <font>
-          <pointsize>15</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
           <underline>true</underline>
@@ -308,7 +345,7 @@ background-color: rgb(0, 170, 255);</string>
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <pointsize>15</pointsize>
          </font>
         </property>
         <property name="text">
@@ -335,6 +372,12 @@ background-color: rgb(0, 170, 255);</string>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QWidget" name="TorquePlot" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <layout class="QHBoxLayout" name="horizontalLayout"/>
        </widget>
       </item>
@@ -352,7 +395,7 @@ background-color: rgb(0, 170, 255);</string>
         </property>
         <property name="font">
          <font>
-          <pointsize>15</pointsize>
+          <pointsize>20</pointsize>
           <weight>75</weight>
           <bold>true</bold>
           <underline>true</underline>
@@ -366,14 +409,14 @@ background-color: rgb(0, 170, 255);</string>
       <item row="1" column="1">
        <widget class="QLabel" name="label_9">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+         <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -381,19 +424,22 @@ background-color: rgb(0, 170, 255);</string>
         <property name="text">
          <string>The pulse duration ramp is a sequential series of electrical stimulation pulses, increasing from 50 to 600 us, in 50 us increments every 3 seconds.</string>
         </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="2" column="1">
        <widget class="QLabel" name="label_11">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+         <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>18</pointsize>
           <italic>true</italic>
          </font>
         </property>
@@ -425,7 +471,7 @@ background-color: rgb(0, 170, 255);</string>
      <x>0</x>
      <y>0</y>
      <width>1273</width>
-     <height>26</height>
+     <height>37</height>
     </rect>
    </property>
   </widget>
