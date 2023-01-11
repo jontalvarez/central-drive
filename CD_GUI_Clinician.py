@@ -305,7 +305,7 @@ class DebugWindow(QtWidgets.QMainWindow):
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/' + 'Central_Drive_' + self.participantID_lbl.text() + '_' + str(self.currentDate.strftime("%Y%m%d")) + '_DebugWindow'
+        default_filename = 'data/' + 'Central_Drive_' + self.participantID_lbl.text() + '_' + str(self.currentDate.strftime("%Y%m%d")) + '_DebugWindow.csv'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
@@ -331,12 +331,11 @@ class DebugWindow(QtWidgets.QMainWindow):
         """Handle key press events."""
         if event.key() == Qt.Key_Escape:
             self.close()
-
+            
     def about_to_quit(self): 
         #if things start going wrong remove self. from all DataLoggingThread definitions
         """This is called whenever anyone presses the X at the top of any window"""
-        # os.system('cls') #clear terminal 
-        print('Exiting Application')
+        # os.system('cls') #clear terminal
         self.thread.terminate()
         self.timer.stop()
         sys.exit()
@@ -383,7 +382,7 @@ class CDWindow(QtWidgets.QMainWindow):
 
         #Setup Auto CD Parameters
         try:
-            self.mfga_sp.setValue(self.mw2.activation_MVC * 0.8)
+            self.mfga_sp.setValue(self.mw2.activation_MVC * 0.85)
             self.variance_sp.setValue(0.1)
         except:
             self.mfga_sp.setValue(0)
@@ -410,7 +409,8 @@ class CDWindow(QtWidgets.QMainWindow):
         self.x_storage = []
         self.y_storage = []
         self.fes_pulse_sent_idx = [] #array to store idx's of any FES pulses delivered
-
+        self.fesmarkerpen = pg.mkPen(color=([0,0,0]), width=2.5) #marker pen params for when fes pulse is sent
+        
         # Setup max torque lcd
         self.max_torque_reached = 0.0
         self.maxTorque_lcd.display(self.max_torque_reached)
@@ -500,8 +500,11 @@ class CDWindow(QtWidgets.QMainWindow):
             MFGA = self.mfga_sp.value()
             SSVAR = self.variance_sp.value()
 
-            #find which indices correspond to x ms back
-            window_size = 0.25 #[s]
+            #find which indices scorrespond to x ms back
+            if self.windowLength_cb.isChecked:
+                window_size = 0.1 #[s]
+            else:
+                window_size = 0.25 #[s]
             current_idx_subset = np.array(self.x_storage[-1]) - np.array(self.x_storage[-1000:]) #take subset we know is definitely within x ms
             correct_idx = np.argmax(current_idx_subset[::-1] > window_size) #idx matching window size (but not correct relative to actual position in x_storage)
 
@@ -511,12 +514,9 @@ class CDWindow(QtWidgets.QMainWindow):
             
             if rollingVar < SSVAR and rollingMean > MFGA: #and rollingMean < 1.1*(perc*MFGA):
                 self.process_fes_request()
-                try:
-                    self.graphWidget.removeItem(self.marker)
-                except:
-                    pass
-                self.marker = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'black', 'width': 2.5}, bounds =[0,100], pos = self.mw2.threadX[-1])
-                self.graphWidget.addItem(self.marker)
+                self.graphWidget.plot(self.mw2.threadX[-2:], [0,1.5*np.abs(self.mw2.threadY[-1])], pen=self.fesmarkerpen)
+#                 self.marker = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'black', 'width': 2.5}, bounds =[0,100], pos = self.mw2.threadX[-1])
+#                 self.graphWidget.addItem(self.marker)
                 self.reset_cd_checkboxes()
                 self.successful_test_counter += 1 #increment sucessful test counter and display
                 self.successfulTestCounter_lcd.display(self.successful_test_counter)
@@ -570,7 +570,7 @@ class CDWindow(QtWidgets.QMainWindow):
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_CDTest'
+        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_CDTest.csv'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
@@ -614,6 +614,18 @@ class CDWindow(QtWidgets.QMainWindow):
         """Handle key press event."""
         if event.key() == Qt.Key_Escape:
             self.close()
+            
+    #this is different from about_to_quit method in main window class because that is for the app (so it works across all windows).
+    #this specifically overrides the close event for just the CD Window!
+    def closeEvent(self,event):
+        result = QMessageBox.question(self,
+                      "Confirm Exit...",
+                      "Are you sure you want to exit? Ensure data is saved prior to doing so!",
+                      QMessageBox.Yes| QMessageBox.No)
+        event.ignore()
+
+        if result == QMessageBox.Yes:
+            event.accept()
 
 # PD RAMP WINDOW:
 # -----------------------------------------------------------------------------------------------------------------------------------------
@@ -670,6 +682,7 @@ class RampWindow(QtWidgets.QMainWindow):
         self.x_storage = [0]
         self.y_storage = [0]
         self.fes_pulse_sent_idx = []
+        self.fesmarkerpen = pg.mkPen(color=([0,0,0]), width=2.5) #marker pen params for when fes pulse is sent
 
         # Setup max torque lcd
         self.max_torque_reached = 0.0
@@ -768,7 +781,7 @@ class RampWindow(QtWidgets.QMainWindow):
         if self.beginTest_pb.isChecked():
             self.beginTest_pb.setStyleSheet("background-color: yellow")
             for i, dur in enumerate(range(50, 650, 50)):
-                QTimer.singleShot(i * 1000, self.outer(100*((i+1)/12), dur)) 
+                QTimer.singleShot(i * 3000, self.outer(100*((i+1)/12), dur)) 
         #     # self.beginTest_pb.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(150, 150, 150)")
         #     QTimer.singleShot(0 * 100, lambda: self.send_pd_ramp_pulse(100*(1/12), 50)) 
         #     QTimer.singleShot(3 * 100, lambda: self.send_pd_ramp_pulse(100*(2/12), 100)) 
@@ -791,12 +804,12 @@ class RampWindow(QtWidgets.QMainWindow):
             amp = int(self.committedAmp_lbl.value())  # [mA]
             channelNum = int(self.mw2.channel_cb.currentText()[0])
             try:
-                # for channels: 1 = red, 2 = blue, 3 = black, 4 = white
-                self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'black', 'width': 2.5}, bounds =[0,150], pos = self.mw2.threadX[-1])
-                self.graphWidget.addItem(self.target)
+                #self.target = pg.InfiniteLine(movable=False, angle=90, pen={'color': 'black', 'width': 2.5}, bounds =[0,150], pos = self.mw2.threadX[-1])
+                #self.graphWidget.addItem(self.target)
                 myFES.write_pulse(channelNum, [(int((dur)/2), amp), (int((dur)/2), -amp)])  
                 self.mw2.mw_pulse_sent_idx.append(len(self.mw2.threadX)) #store in case download from Main Window
                 self.fes_pulse_sent_idx.append(len(self.mw2.threadX)) #store index when FES pulse sent
+                self.graphWidget.plot(self.mw2.threadX[-2:], [0,1.5*np.abs(self.mw2.threadY[-1])], pen=self.fesmarkerpen)
             except:
                 self.error_dialog.showMessage('Stimulation not delivered, double check connection to Hasomed')
             if pbar == 100:
@@ -827,7 +840,7 @@ class RampWindow(QtWidgets.QMainWindow):
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_PDRamp'
+        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_PDRamp.csv'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
@@ -1018,7 +1031,7 @@ class ActivationWindow(QtWidgets.QMainWindow):
     def download(self):
         self.timer.stop()
         """Download data from GUI."""
-        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_ActivationMVC'
+        default_filename = 'data/' + 'Central_Drive_' + self.mw2.participantID_lbl.text() + '_' + str(self.mw2.currentDate.strftime("%Y%m%d")) + '_ActivationMVC.csv'
         filename, _ = QFileDialog.getSaveFileName(
             self, "Save data file", default_filename, "CSV Files (*.csv)")
         if filename:
@@ -1096,7 +1109,6 @@ class Ramp_Visualization(QtWidgets.QMainWindow):
     #### MISCELLANEOUS METHODS ####
     def connect_to_main(self):
         """Connect to main GUI."""
-        self.mw2.activation_MVC = max(self.mw2.threadY[self.window_time_start_idx:])
         self.mw2.windowFlag = 0
         self.mw2.show()
         self.close()
