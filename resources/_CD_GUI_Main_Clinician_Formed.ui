@@ -303,7 +303,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Enable FES</string>
+         <string>Enable NMES</string>
         </property>
        </widget>
       </item>
@@ -321,7 +321,7 @@
          <string notr="true">background-color: rgb(255, 0, 0);</string>
         </property>
         <property name="text">
-         <string>Send FES Pulse</string>
+         <string>Send NMES Pulse</string>
         </property>
        </widget>
       </item>
@@ -395,7 +395,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Commit FES Params</string>
+         <string>Commit NMES Params</string>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -505,7 +505,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Select FES Channel</string>
+         <string>Select NMES Channel</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

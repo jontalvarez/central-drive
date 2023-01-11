@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1170</width>
-    <height>816</height>
+    <width>1273</width>
+    <height>758</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,238 +27,20 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="9" column="0" colspan="4">
-         <widget class="Line" name="line_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="4">
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0">
-         <widget class="QLabel" name="label_7">
+      <item row="0" column="0" colspan="3">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QWidget" name="TorquePlot" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Max Torque Reached (ft-lbs)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_9">
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Percentage of MFGA (ft-lbs)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="1">
-         <widget class="QLCDNumber" name="maxTorque_lcd">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="segmentStyle">
-           <enum>QLCDNumber::Flat</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="label_12">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Successful Central Drive Tests</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_10">
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Steady State Variance (ft-lbs)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1" colspan="3">
-         <widget class="QDoubleSpinBox" name="variance_sp"/>
-        </item>
-        <item row="4" column="0" colspan="4">
-         <widget class="QLabel" name="label_13">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-            <underline>true</underline>
-           </font>
-          </property>
-          <property name="text">
-           <string>Central Drive Test</string>
-          </property>
-          <property name="scaledContents">
-           <bool>false</bool>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QLCDNumber" name="currentTorque_lcd">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="segmentStyle">
-           <enum>QLCDNumber::Flat</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="13" column="0" colspan="4">
-         <widget class="Line" name="line_5">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0" colspan="4">
-         <widget class="QPushButton" name="beginTest_pb">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
           </property>
           <property name="styleSheet">
-           <string notr="true">background-color: rgb(0, 170, 255);
-color: rgb(255, 255, 255);</string>
+           <string notr="true"/>
           </property>
-          <property name="text">
-           <string>Begin Test</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="3">
-         <widget class="QPushButton" name="download_pb">
-          <property name="text">
-           <string>Download Data</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="1">
-         <widget class="QLCDNumber" name="successfulTestCounter_lcd">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="segmentStyle">
-           <enum>QLCDNumber::Flat</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1" colspan="3">
-         <widget class="QDoubleSpinBox" name="mfga_sp"/>
-        </item>
-        <item row="11" column="0">
-         <widget class="QLabel" name="label_8">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Current Torque (ft-lbs)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="0">
-         <widget class="QCheckBox" name="target_cb">
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Display Target</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="3">
-         <widget class="QPushButton" name="maxTorqueReset_pb">
-          <property name="text">
-           <string>Reset Value</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="2">
-         <widget class="Line" name="line_8">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout"/>
          </widget>
         </item>
        </layout>
@@ -281,7 +63,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>11</pointsize>
+            <pointsize>15</pointsize>
            </font>
           </property>
           <property name="text">
@@ -299,7 +81,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>11</pointsize>
+            <pointsize>15</pointsize>
             <italic>false</italic>
            </font>
           </property>
@@ -316,6 +98,11 @@ color: rgb(255, 255, 255);</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
           <property name="segmentStyle">
            <enum>QLCDNumber::Outline</enum>
           </property>
@@ -331,7 +118,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>11</pointsize>
+            <pointsize>15</pointsize>
            </font>
           </property>
           <property name="text">
@@ -349,14 +136,14 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>15</pointsize>
+            <pointsize>18</pointsize>
             <weight>75</weight>
             <bold>true</bold>
             <underline>true</underline>
            </font>
           </property>
           <property name="text">
-           <string>Current FES Parameters</string>
+           <string>Current NMES Parameters</string>
           </property>
           <property name="scaledContents">
            <bool>false</bool>
@@ -374,6 +161,11 @@ color: rgb(255, 255, 255);</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
           <property name="segmentStyle">
            <enum>QLCDNumber::Outline</enum>
           </property>
@@ -386,6 +178,11 @@ color: rgb(255, 255, 255);</string>
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
           </property>
           <property name="segmentStyle">
            <enum>QLCDNumber::Outline</enum>
@@ -402,7 +199,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>11</pointsize>
+            <pointsize>15</pointsize>
            </font>
           </property>
           <property name="text">
@@ -420,7 +217,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>11</pointsize>
+            <pointsize>15</pointsize>
            </font>
           </property>
           <property name="text">
@@ -436,6 +233,11 @@ color: rgb(255, 255, 255);</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
           <property name="segmentStyle">
            <enum>QLCDNumber::Outline</enum>
           </property>
@@ -448,6 +250,11 @@ color: rgb(255, 255, 255);</string>
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
           </property>
           <property name="text">
            <string>TextLabel</string>
@@ -482,18 +289,6 @@ color: rgb(255, 255, 255);</string>
         </item>
        </layout>
       </item>
-      <item row="0" column="0" colspan="3">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QWidget" name="TorquePlot" native="true">
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout"/>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="1" column="0" colspan="3">
        <layout class="QFormLayout" name="formLayout_2">
         <item row="1" column="0" colspan="2">
@@ -506,7 +301,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>10</pointsize>
+            <pointsize>18</pointsize>
             <weight>75</weight>
             <italic>true</italic>
             <bold>true</bold>
@@ -533,7 +328,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>15</pointsize>
+            <pointsize>20</pointsize>
             <weight>75</weight>
             <bold>true</bold>
             <underline>true</underline>
@@ -554,7 +349,7 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>10</pointsize>
+            <pointsize>15</pointsize>
             <italic>true</italic>
            </font>
           </property>
@@ -563,6 +358,311 @@ color: rgb(255, 255, 255);</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="2">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="13" column="0">
+         <widget class="QCheckBox" name="target_cb">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Display Target</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="5">
+         <widget class="QLCDNumber" name="successfulTestCounter_lcd">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="segmentStyle">
+           <enum>QLCDNumber::Flat</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Percentage of MFGA (ft-lbs)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QLabel" name="label_13">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+            <underline>true</underline>
+           </font>
+          </property>
+          <property name="text">
+           <string>Central Drive Test</string>
+          </property>
+          <property name="scaledContents">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="14" column="0" colspan="6">
+         <widget class="Line" name="line_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="5">
+         <widget class="QPushButton" name="maxTorqueReset_pb">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Reset Value</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="3" rowspan="4">
+         <widget class="Line" name="line_6">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="5">
+         <widget class="QLCDNumber" name="maxTorque_lcd">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="segmentStyle">
+           <enum>QLCDNumber::Flat</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="4">
+         <widget class="QPushButton" name="download_pb">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(0, 170, 0);</string>
+          </property>
+          <property name="text">
+           <string>End Test</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="5">
+         <widget class="QLCDNumber" name="currentTorque_lcd">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="segmentStyle">
+           <enum>QLCDNumber::Flat</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0" colspan="6">
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Steady State Variance (ft-lbs)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0" colspan="3">
+         <widget class="QPushButton" name="beginTest_pb">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 170, 255);
+color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="text">
+           <string>Begin Test</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="6">
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1" colspan="2">
+         <widget class="QDoubleSpinBox" name="mfga_sp">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="maximum">
+           <double>150.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1" colspan="2">
+         <widget class="QDoubleSpinBox" name="variance_sp">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="singleStep">
+           <double>0.050000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="4">
+         <widget class="QLabel" name="label_8">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Current Torque (ft-lbs)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="4">
+         <widget class="QLabel" name="label_12">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Successful CD Tests</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="4">
+         <widget class="QLabel" name="label_7">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Max Torque Reached (ft-lbs)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0" colspan="3">
+         <widget class="QCheckBox" name="windowLength_cb">
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(134, 134, 134);</string>
+          </property>
+          <property name="text">
+           <string> shorten window length to 0.1 ms</string>
           </property>
          </widget>
         </item>
@@ -577,8 +677,8 @@ color: rgb(255, 255, 255);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1170</width>
-     <height>26</height>
+     <width>1273</width>
+     <height>37</height>
     </rect>
    </property>
   </widget>
